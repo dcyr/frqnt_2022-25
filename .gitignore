@@ -1,0 +1,11 @@
+.Rhistory
+[0-9]*
+*offline
+*.html
+*~
+*.rds
+*old
+*temp
+gis/sourceData
+
+
