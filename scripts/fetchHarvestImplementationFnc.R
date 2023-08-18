@@ -6,7 +6,11 @@ fetchHarvestImplementation <- function(x) { #function(x, prescripLvls) {
     harvestImpTmp <- readLines(x)
     index <- grep("HarvestImplementations|PrescriptionMaps", harvestImpTmp)
     harvestImpTmp <- harvestImpTmp[index[1]:(index[2]-1)]
-    harvestImpTmp <- harvestImpTmp[-which(substr(harvestImpTmp, 1,1) == ">")][-1]
+    index <- which(substr(harvestImpTmp, 1,1) == ">")
+    if(length(index)>0) {
+        harvestImpTmp <- harvestImpTmp[-index][-1]
+    }
+    harvestImpTmp <- harvestImpTmp[-grep("HarvestImplementations", harvestImpTmp)]
     harvestImpTmp <- harvestImpTmp[-which(nchar(harvestImpTmp) == 0)]
     #HarvestImpTmp <-  HarvestImpTmp[grep(paste(prescriptLvls, collapse = "|"), HarvestImpTmp)]
     #### putting into a nice data frame

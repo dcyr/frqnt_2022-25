@@ -5,7 +5,7 @@ rm(list = ls())
 home <- path.expand("~")
 home <- gsub("\\\\", "/", home)
 home <- gsub("/Documents", "", home) # necessary on my Windows machine
-setwd(paste(home, "Sync/Travail/ECCC/Landis-II/Montmorency_calib/", sep = "/"))
+setwd(paste(home, "Sync/Travail/ECCC/Landis-II/frqnt_2022-25/", sep = "/"))
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
 
 dir.create(wwd)
@@ -15,8 +15,8 @@ setwd(wwd)
 
 
 ### fetching outputs
-a <- "ForMont"
-simDir <- paste0("D:/ForCS - ForMont_2022-08-09/")#"#Montmorency-Hereford"#"D:/ForCS - "
+a <- "mixedwood-042-51"
+simDir <- paste0("D:/ForCS - mixedwood-042-51_prelimTest")#"
 simName <- gsub("ForCS - ", "", basename(simDir))
 #simDir <- paste0("D:/ForCS - Test/2020-06-11")#"#Montmorency-Hereford"#"D:/ForCS - "
 simInfo <- read.csv(paste(simDir, "simInfo.csv", sep = "/"),

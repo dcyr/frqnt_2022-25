@@ -5,7 +5,7 @@ rm(list = ls())
 home <- path.expand("~")
 home <- gsub("\\\\", "/", home)
 home <- gsub("/Documents", "", home) # necessary on my Windows machine
-setwd(paste(home, "Sync/Travail/ECCC/Landis-II/Montmorency_calib/", sep = "/"))
+setwd(paste(home, "Sync/Travail/ECCC/Landis-II/frqnt_2022-25/", sep = "/"))
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
 dir.create(wwd)
 setwd(wwd)
@@ -13,37 +13,53 @@ require(dplyr)
 
 initYear <- 2020
 unitConvFact <- 0.01 ### from gC /m2 to tonnes per ha
-simName <- "ForMont_2022-08-09"
-a <- ifelse(grepl("ForMont", simName), "ForMont",
-            ifelse(grepl("Hereford", simName), "Forêt Hereford", simName))
+simName <- "boreal-5a_prelimTest"
+a <- ifelse(grepl("mixedwood-042-51", simName), "mixedwood-042-51",
+            ifelse(grepl("boreal-5a", simName), "boreal-5a",
+                   ifelse(grepl("temperate-2a-3b", simName), "temperate-2a-3b")))
 
-areaName <- ifelse(a == "ForMont", "Forêt Montmorency",
-                   ifelse(a == "Hereford", "Forêt Hereford", a))
+areaName <- a
+# areaName <- ifelse(a == "ForMont", "Forêt Montmorency",
+#                    ifelse(a == "Hereford", "Forêt Hereford", a))
 
 require(ggplot2)
 require(dplyr)
 require(tidyr)
-
+require(scales)
 
 ##########################################################
 ##### pools
 variableLvl <- c("TotalEcosys", "TotalDOM", "ABio", "BBio") ## ordering levels for plotting
 
 
-mgmtLevels <- list(ForMont = c("CPRS" = "CPRS",
-                               "CPI-CP" = "Couvert permanent",
-                               "noHarvest" = "Conservation"))
+mgmtLevels <- list("boreal-5a" = c("generic" = "Generic",
+                                   #"CPI-CP" = "Couvert permanent",
+                                   "noHarvest" = "Conservation"),
+                   "mixedwood-042-51" = c("generic" = "Generic",
+                                   #"CPI-CP" = "Couvert permanent",
+                                   "noHarvest" = "Conservation"),
+                   "temperate-2a-3b" = c("generic" = "Generic",
+                                   #"CPI-CP" = "Couvert permanent",
+                                   "noHarvest" = "Conservation"))
 
 mgmtLvls <- c("CPRS", "Couvert permanent", "Conservation")
 
 
 
 
-cols <- list(ForMont = c("CPRS" = "black",
-                         "Couvert permanent" = "dodgerblue3",
-                         "Conservation" = "goldenrod3"))
+cols <- list("boreal-5a" = c("Generic" = "black",
+                                    #"Couvert permanent" = "dodgerblue3",
+                                    "Conservation" = "goldenrod3"),
+             "mixedwood-042-51" = c("Generic" = "black",
+                                    #"Couvert permanent" = "dodgerblue3",
+                                    "Conservation" = "goldenrod3"),
+             "temperate-2a-3b" = c("Generic" = "black",
+                                   #"Couvert permanent" = "dodgerblue3",
+                                   "Conservation" = "goldenrod3"))
 
-scenRef <- list(ForMont = "CPRS")
+scenRef <-  list("boreal-5a" = "generic",
+                 "mixedwood-042-51" = "generic",
+                 "temperate-2a-3b" = "generic")
 ################################################################################
 ################################################################################
 ################################################################################
@@ -121,39 +137,29 @@ dfRef <- dfRef[,cNames]
 
 ref <- df
 
-
-if(a == "Hereford") {
-    p <- ggplot(df, aes(x = initYear+Time, y = value*unitConvFact,
-                   colour = mgmtScenario)) 
-}
-
-if(a == "ForMont") {
-    
-   p <- ggplot(df, aes(x = initYear+Time, y = value*unitConvFact,
-                   colour = mgmtScenarioName))
-}
-
-p <- p +
+  
+p <- ggplot(df, aes(x = initYear+Time, y = value*unitConvFact,
+               colour = mgmtScenarioName)) +
     facet_grid(variable ~ scenario, scale = "free") +
     theme_bw() +
-    scale_color_manual(name = "Scénario\nd'aménagement",
+    scale_color_manual(name = "Management\nscenario",
                        values = cols[[a]]) +
 
-    geom_line(size = 0.5) +
+    geom_line(linewidth = 0.5) +
     theme(plot.caption = element_text(size = rel(.5), hjust = 0),
           axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(title = "Évolution de la densité moyenne en carbone",
+    labs(title = "Evolution of carbon density",
          subtitle = paste(areaName, simName),
          x = "",
          y = expression(paste("tonnes C"," ha"^"-1","\n")),
-         caption = paste0("ABio : Biomasse aérienne",
-                          "\nBBio : Biomasse souterraine",
-                          "\nTotalDOM : Bois mort, litière, humus et sol minéral"))
+         caption = paste0("ABio : Aboveground biomass",
+                          "\nBBio : belowground biomass",
+                          "\nTotalDOM : Deadwood, litter, humus and mineral soil"))
 
 
     
 png(filename= paste0("pools_", simName, ".png"),
-    width = 8, height = 6, units = "in", res = 600, pointsize=10)
+    width = 9, height = 6, units = "in", res = 600, pointsize=10)
     
     print(p)
 
@@ -196,29 +202,21 @@ df <- outputSummary %>%
              Time, variable) %>%
     summarise(value = mean(value))
 
-    
-if(a == "Hereford") {
 
-    p <- ggplot(df, aes(x =  initYear+Time, y = value*unitConvFact, #group = simID,
-                       colour = mgmtScenario)) 
-}
-if(a == "ForMont") {
-    
-    p <- ggplot(df, aes(x = initYear+Time, y = value*unitConvFact, #group = simID,
-                       colour = as.factor(mgmtScenarioName)))
-}
-
-p <- p + facet_grid(variable ~ scenario, scale = "free") +#facet_wrap( ~ scenario) +
+p <- ggplot(df, aes(x = initYear+Time, y = value*unitConvFact, #group = simID,
+                   colour = as.factor(mgmtScenarioName))) +
+    facet_grid(variable ~ scenario, scale = "free") +#facet_wrap( ~ scenario) +
     theme_bw() +
     geom_hline(yintercept = 0, linetype = 1, color = "grey25", size = 0.35) +
     geom_line() +
     theme(plot.caption = element_text(size = rel(.5), hjust = 0),
           axis.text.x = element_text(angle = 45, hjust = 1)) +
-    scale_color_manual(name = "Scénario\nd'aménagement",
+    scale_color_manual(name = "Management\nscenario",
                        values = cols[[a]]) +
     theme(plot.caption = element_text(size = rel(.5), hjust = 0)) +
-    labs(title = paste("Dynamique du carbone"),
+    labs(title = paste("Carbon dynamics"),
          subtitle = paste(areaName, simName),
+         x = "",
          y = expression(paste("tonnes C"," ha"^"-1", " yr"^"-1", "\n")),
          caption = paste(caption, collapse = "\n")) 
 
@@ -268,7 +266,7 @@ colourCount = length(unique(df$species))
 getPalette = colorRampPalette(brewer.pal(8, "Set1"))
 
 ### stacked (per species)
-pWidth <- 4*length(unique(df$mgmtScenario))
+pWidth <- 4*length(unique(df$mgmtScenario))+2
 png(filename= paste0("fps_spp_", simName, ".png"),
     width = pWidth, height = 6, units = "in", res = 600, pointsize=10)
 
@@ -277,14 +275,15 @@ ggplot(df, aes(x = initYear+Time, y = BioToFPS_tonnesCTotal)) +
     stat_summary(aes(fill = species), fun.y="sum", geom="area", position = "stack") +
     facet_grid(scenario ~ mgmtScenarioName ) +
     scale_fill_manual(values = getPalette(colourCount)) +
+    scale_y_continuous(labels = label_number(suffix = "kt C", scale = 1e-3)) +
     theme_dark() +
     theme(plot.caption = element_text(size = rel(.5), hjust = 0),
           axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(title = "Transfers vers les produits forestiers",
+    labs(title = "Transfers to harvested wood products",
          subtitle = paste(areaName, simName),
          x = "",
-         y = expression(paste("tonnes C récoltées","\n"))) +
-    geom_text(data = labdf, aes(label = paste("Superficie aménagée:", areaManagedTotal_ha, "ha"),
+         y = expression(paste("harvested wood",))) +
+    geom_text(data = labdf, aes(label = paste("Managed area:", areaManagedTotal_ha, "ha"),
                                 y = yMax, x = initYear),
               hjust = 0, vjust = 1, size = 2)
     
@@ -293,27 +292,22 @@ dev.off()
 
 
 ### total
-if(a == "Hereford") {
-    p <- ggplot(dfTotal, aes(x = initYear+Time, y = BioToFPS_tonnesCTotal,
-                             colour = mgmtScenario))
-}
-if(a == "ForMont") {
-    p <- ggplot(dfTotal, aes(x = initYear+Time, y = BioToFPS_tonnesCTotal,
-                             colour = mgmtScenarioName))
-}
 
-p <- p + geom_line()+
+p <- ggplot(dfTotal, aes(x = initYear+Time, y = BioToFPS_tonnesCTotal,
+                         colour = mgmtScenarioName)) +
+    geom_line() +
     facet_wrap( ~ scenario) +
-    scale_color_manual(name = "Scénario\nd'aménagement",
+    scale_color_manual(name = "Management\nscenario",
                        values = cols[[a]]) +
+    scale_y_continuous(labels = label_number(suffix = "kt C", scale = 1e-3)) +
     theme_dark() +
     theme(plot.caption = element_text(size = rel(.5), hjust = 0),
           axis.text.x = element_text(angle = 45, hjust = 1)) +
-    lims(y = c(0,20000)) +
-    labs(title = "Transfers vers les produits forestiers",
+    #lims(y = c(0,20000)) +
+    labs(title = "Transfers to harvested wood products",
          subtitle = paste(areaName, simName),
          x = "",
-         y = expression(paste("tonnes C récoltées","\n")))
+         y = expression(paste("harvested wood",))) 
          #y = expression(paste("tonnes C"," ha"^"-1", "récolté","\n")))
 
 
@@ -381,7 +375,7 @@ pHeight <- 2 * length(unique(df$mgmtScenario))
 png(filename= paste0("agb_sppStack_", simName, ".png"),
     width = 8, height = pHeight, units = "in", res = 600, pointsize=10)
 
-ggplot(df, aes(x = 2020+Time, y = agb_tonnesTotal/areaTotal_ha)) + 
+ggplot(df, aes(x = 2020 + Time, y = agb_tonnesTotal/areaTotal_ha)) + 
     stat_summary(aes(fill = species), fun.y="sum", geom="area", position = "stack") +
     facet_grid(mgmtScenarioName ~ scenario) +
     scale_fill_manual("",
@@ -389,11 +383,11 @@ ggplot(df, aes(x = 2020+Time, y = agb_tonnesTotal/areaTotal_ha)) +
     theme_bw() +
     theme(plot.caption = element_text(size = rel(.5), hjust = 0),
           axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(title = "Évolution de la composition forestière  - Biomasse aérienne*",
+    labs(title = "Evolution of landscape composition  - Aboveground biomass*",
          subtitle = paste(areaName, simName),
          x = "",
          y = expression(paste("tonnes"," ha"^"-1")),
-         caption = "*Les valeurs sont exprimées ici en terme de poids sec (biomasse), et non de carbone")
+         caption = "*Values are expressed as total dry mass (biomass), not carbon mass.")
 
 
 dev.off()
@@ -418,11 +412,11 @@ ggplot(df, aes(x = 2020+Time, y = agb_tonnesTotal/areaTotal_ha,
     theme_bw() +
     theme(plot.caption = element_text(size = rel(.5), hjust = 0),
           axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(title = "Évolution de la composition forestière  - Biomasse aérienne*",
-         subtitle = paste(areaName),
+    labs(title = "Evolution of landscape composition  - Aboveground biomass*",
+         subtitle = paste(areaName, simName),
          x = "",
          y = expression(paste("tonnes"," ha"^"-1")),
-         caption = "*Les valeurs sont exprimées ici en terme de poids sec (biomasse), et non de carbone")
+         caption = "*Values are expressed as total dry mass (biomass), not carbon mass.")
 
 
 dev.off()
@@ -497,20 +491,8 @@ df <- AGB %>%
     mutate(mgmtScenario = factor(mgmtLevels[[a]][match(as.character(mgmtScenario), names(mgmtLevels[[a]]))],
                                  levels = mgmtLevels[[a]]))
 
-if (a == "ForMont") {
-   df <- df %>% mutate(plantedSp = ifelse(grepl("EPB", mgmtScenario), "P. glauca",
-                                          ifelse(grepl( "EPN", mgmtScenario), "P. mariana",
-                                                 ifelse(grepl("EPR", mgmtScenario), "P. rubens", "N/A"))),
-                       mgmt =  factor(gsub(" - |EPN|EPB|EPR", "", mgmtScenario), levels = mgmtLvls))
-}
-if (a == "Hereford") {
-    df <- df %>% mutate(mgmt =  mgmtScenario)
-    
-}
 
-
-
-df <- df %>% 
+df <- df %>% mutate(mgmt =  mgmtScenario) %>% 
     group_by(areaName, scenario, mgmtScenario,
              mgmt,
              Time, replicate,
@@ -546,16 +528,16 @@ df[,"ageClass"] <- factor(df$ageClass, levels = acLvls)
 p <- ggplot(df, aes(x = 2020+Time, y = agb_tonnesTotal/areaTotal_ha)) + 
     stat_summary(aes(fill = ageClass), fun.y="sum", geom="area", position = "stack") +
     facet_grid(scenario ~ mgmt, scales = "fixed") +#scales = "free_y") +
-    scale_fill_manual("Classe d'âge",
+    scale_fill_manual("Age classes",
                       values = cols)+
     theme_bw() +
     theme(plot.caption = element_text(size = rel(1), hjust = 0),
           axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(title = paste0("Évolution de la structure d'âge de la ", areaName),
-         subtitle = paste0("Biomasse aérienne* par classes d'âge"),
+    labs(title = paste0("Evolution of age structure - ", areaName, " - ", simName),
+         subtitle = paste0("Aboveground biomass broken down by age classes"),
          x = "",
          y = expression(paste("tonnes"," ha"^"-1")),
-         caption = "*Les valeurs sont exprimées ici en terme de poids sec (biomasse), et non de carbone")
+         caption = "*Values are expressed as total dry mass (biomass), not carbon mass.")
 
 png(filename= paste0("agb_AgeClassStacked_",simName, ".png"),
     width = 10, height = 6, units = "in", res = 600, pointsize=10)
