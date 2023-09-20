@@ -1,0 +1,16 @@
+Overview of preliminary input files
+./simPkgs
+./scripts
+./outputsCompiled
+./figures
+./inputsLandis
+
+List of topics for upcoming meetings
+-DOM initialization (Jane)
+-BDA extension / Spruce budworm (Wena)
+-Fire regime / variable severity (Naveen, Wena)
+-Wind disturbances (all)
+-Soil organic carbon / Deep organic layers (mosses, peat, etc. Naveen)
+-…
+
+
