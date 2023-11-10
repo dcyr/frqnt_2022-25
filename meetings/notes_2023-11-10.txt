@@ -1,0 +1,35 @@
+2023-11-10
+Today's topic - Fire disturbances
+
+-Base fire extension
+-Fire regime Baseline (Boulanger et al 2014) and projected (Boulanger et al 2017)
+-Other potential empirical products
+
+References 
+Boulanger et al. 2014. “A Refinement of Models Projecting Future Canadian Fire Regimes Using Homogeneous Fire Regime Zones.” Canadian Journal of Forest Research 44 (4): 365–76. https://doi.org/10.1139/cjfr-2013-0372.
+Boulanger et al. 2017. “Changes in Mean Forest Age in Canada’s Forests Could Limit Future Increases in Area Burned but Compromise Potential Harvestable Conifer Volumes.” Canadian Journal of Forest Research 47 (6): 755–64. https://doi.org/10.1139/cjfr-2016-0445.
+Gauthier et al. 2015. “Strategic Analysis of Forest Vulnerability to Risk Related to Fire : An Example from the Coniferous Boreal Forest of Quebec.” Canadian Journal of Forest Research 45: 553–65.
+Couillard et al. 2022. “Zonage des régimes de feux du Québec méridional.” 189. Direction de la Recherche Forestière - Ministère des Ressources naturelles et de la Faune.
+
+
+
+Action items:
+Check fire severity data product used by CFS for the National Inventory Report and 
+
+List of topics for upcoming meetings
+
+
+-Baseline scenario (Naveen)
+-CBM AIDB (Archive Index Database)
+-Biomass harvest
+-BDA extension / Spruce budworm (Wena)
+-Fire regime / variable severity (Naveen, Wena)
+-Wind disturbances (all)
+-Soil organic carbon / Deep organic layers (mosses, peat, etc. Naveen)
+-…
+
+Past topics
+-2023-09-20 - Kick-off meeting
+-2023-10-13 - DOM initialization 
+-2023-10-18 - Wind disturbances
+-2023-10-25 - Picus parameterization and coupling with Landis-II
