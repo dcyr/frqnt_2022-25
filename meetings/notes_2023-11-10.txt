@@ -21,15 +21,13 @@ List of topics for upcoming meetings
 
 -Baseline scenario (Naveen)
 -CBM AIDB (Archive Index Database)
--Biomass harvest
+-Biomass harvest extension
 -BDA extension / Spruce budworm (Wena)
--Fire regime / variable severity (Naveen, Wena)
--Wind disturbances (all)
 -Soil organic carbon / Deep organic layers (mosses, peat, etc. Naveen)
 -…
 
 Past topics
--2023-09-20 - Kick-off meeting
--2023-10-13 - DOM initialization 
--2023-10-18 - Wind disturbances
--2023-10-25 - Picus parameterization and coupling with Landis-II
+-2023-09-20 - Kick-off meeting (overview)
+-2023-10-13 - DOM initialization  (overview)
+-2023-10-18 - Wind disturbances (overview)
+-2023-10-25 - Picus parameterization and coupling with Landis-II (overview)
