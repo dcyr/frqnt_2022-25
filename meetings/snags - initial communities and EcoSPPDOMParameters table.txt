@@ -1,0 +1,53 @@
+Hi Dominic
+Thanks for the question.
+
+The EcoSppDOMParameters table is for stocks at approximately age=0 of a stand. That way they replace the majority of the DOM and Soil spin up.
+
+The last spin up phase cannot be ignored as it creates the cohorts in the initial communities. This last phase grows the forest from age = 1 for the living cohorts to whatever age is in the initial communities text file. DOM and soil dynamics happen as they would during a normal simulation.
+
+So let’s say you have EcoSppDOMParameters table for snags at 60 because it’s representing a 1 year old stand post fire. 
+
+In the initial communities the stand is age 100, so in t=1 the snag stocks will be lower (e.g. 20) because they’ve fallen over and decayed, some have been replaced by competition.
+
+Now, what if you have a spruce budworm outbreak in the past of your landscape? That’s when you use the snag table.
+
+For example, you want an initial community stand age 100 with snag stocks at 75 when t=1 because of spruce budworm.  
+Let’s say the spruce budworm hit 20 years before your simulation starts and caused 50% mortality.
+
+ForCs will start the last spin up phase with snags at 60, normal dynamics will occur until the stand is 80 years old (20 years before t=0). 50% mortality will be applied. From there normal growth and decay dynamics occur until t=-1 when your simulation takes over.
+
+I’m sure there is a silvicultural application for the snag table but I can’t think of it at the moment.
+
+Feel free to follow up!
+Caren
+
+
+
+From: Cyr,Dominic (ECCC) <Dominic.Cyr@ec.gc.ca> 
+Sent: Tuesday, February 6, 2024 8:55 AM
+To: Dymond, Caren FOR:EX <Caren.Dymond@gov.bc.ca>
+Subject: snags - initial communities and EcoSppDOMParameters table
+
+[EXTERNAL] This email came from an external source. Only open attachments or links that you are expecting from a known sender.
+
+Hi Caren,
+
+Frédérik Doyon and I co-supervise a student who is working on the temperate forest of southern Quebec using ForCS. In her first chapter, she will focus on the DOM dynamics and interactions with sylvicultural treatments that are typical of this area.
+
+We plan to disable the soil spin-up and set the initial values using empirical information, including snags. We also consider to add snags in the initial communities, but I don’t understand how it interacts (or not) with the initial stocks values in the EcoSppDOMParameters table for pools #8 (snags) and #9 (snags other). Those two sets of inputs appear to be redundant. Do ones override the others? Or maybe there is something else that I’m missing here. 
+
+Thanks, and have a nice day,
+Dominic
+
+-------------
+Chercheur scientifique 
+Modélisation d'écosystèmes forestiers - Dynamique du carbone
+Environnement et Changement climatique Canada
+Division des inventaires et rapports sur les polluants
+
+Research Scientist
+Forest ecosystem modelling - Carbon dynamics
+Environment and Climate Change Canada
+Pollutant Inventories and Reporting Division
+-------------
+

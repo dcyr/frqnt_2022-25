@@ -1,0 +1,40 @@
+2023-11-29
+Today's topic - CBM AIDB (Archive Index Database)
+
+Action item from last meetingAction items:
+Fire severity data product used by CFS for the National Inventory Report 
+https://open.canada.ca/data/en/dataset/b1f61b7e-4ba6-4244-bc79-c1174f2f92cd
+
+-What is the AIDB
+-Overview
+-Link with ForCS - Input file
+-Link with ForCS - script
+
+
+
+References 
+Kull et al. 2017. Carbon Budget Model of the Canadian Forest Sector ( CBM-CFS3 ): Archive Index Database Table and Parameter Descriptions.
+Kurz et al. 2009. “CBM-CFS3: A Model of Carbon-Dynamics in Forestry and Land-Use Change Implementing IPCC Standards.” Ecological Modelling 220 (4): 480–504. https://doi.org/10.1016/j.ecolmodel.2008.10.018.
+Hafer et al. 2023. “National Forest Carbon Monitoring, Accounting and Reporting System (NFCMARS) System Description.”
+
+
+
+Action items:
+
+
+List of topics for upcoming meetings
+
+
+-Baseline scenario (Naveen)
+-Biomass harvest extension
+-BDA extension / Spruce budworm (Wena)
+-Soil organic carbon / Deep organic layers (mosses, peat, etc. Naveen)
+-Allometric equations
+-…
+
+Past topics
+-2023-09-20 - Kick-off meeting (overview)
+-2023-10-13 - DOM initialization  (overview)
+-2023-10-18 - Wind disturbances (overview)
+-2023-10-25 - Picus parameterization and coupling with Landis-II (overview)
+-2023-11-10 - Fire disturbances

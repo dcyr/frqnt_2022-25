@@ -1,0 +1,36 @@
+2023-12-13
+Today's topic - Biomass harvest extension
+
+Action item from last meetingAction items: None
+
+- Biomass Harvest Extension input - Harvesting landscape (Mgmt units and stands)
+- Biomass Harvest Extension input file - Prescriptions
+- Biomass Harvest Extension input file - Implementation table
+- Limitations - Area-based vs volume based
+- Outputs
+
+
+
+References 
+Scheller et al. 2019. “LANDIS-II Base Harvest v4.0 User Guide”
+Scheller, Robert M, and James B. Domingo. 2021. “Biomass Harvest v4.4 LANDIS-II Extension User Guide.”
+
+
+
+Action items:
+
+
+List of topics for upcoming meetings
+-Baseline scenario (Naveen)
+-BDA extension / Spruce budworm (Wena)
+-Soil organic carbon / Deep organic layers (mosses, peat, etc. Naveen)
+-Allometric equations
+-…
+
+Past topics
+-2023-09-20 - Kick-off meeting (overview)
+-2023-10-13 - DOM initialization  (overview)
+-2023-10-18 - Wind disturbances (overview)
+-2023-10-25 - Picus parameterization and coupling with Landis-II (overview)
+-2023-11-10 - Fire disturbances
+-2023-11-29 - CBM AIDB (Archive Index Database)
