@@ -1,0 +1,26 @@
+2024-04-10
+Today's topic - 
+
+
+
+References 
+
+
+Action items:
+
+
+List of topics for upcoming meetings
+-Baseline scenario (Naveen)
+-Soil organic carbon / Deep organic layers (mosses, peat, etc. Naveen)
+-Allometric equations
+-…
+
+Past topics
+-2023-09-20 - Kick-off meeting (overview)
+-2023-10-13 - DOM initialization  (overview)
+-2023-10-18 - Wind disturbances (overview)
+-2023-10-25 - Picus parameterization and coupling with Landis-II (overview)
+-2023-11-10 - Fire disturbances
+-2023-11-29 - CBM AIDB (Archive Index Database)
+-2023-12-13 - Biomass harvest
+-2024-04-10 - BDA - Spruce Budworm

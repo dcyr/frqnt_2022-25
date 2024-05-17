@@ -58,9 +58,9 @@ BDASpeciesParameters
 >>Species  MinorHost    2ndHost      MajorHost    Class3        Class2        Class1	    CFS
 >>Name     Age SRDProb  Age SRDProb  Age SRDProb  Age VulnProb  Age VulnProb  Age VulnProb  Conifer?
 >> ---------------------------------------------------------------------------------------------
-ABIE.BAL 0 0.25 20 0.5 40 1 0 0 20 0.42 50 0.85 yes
-PICE.GLA 0 0.18 20 0.36 40 0.72 0 0 20 0.15 50 0.42 yes
-PICE.MAR 0 0.07 20 0.14 40 0.28 20 0.13 50 0.36 999 1 yes
+ABIE.BAL 0 	0.25 	20 	0.5 	40 	1 	0 	0 	20 	0.42 	50 	0.85 	yes
+PICE.GLA 0 	0.18 	20 	0.36 	40 	0.72 	0 	0 	20 	0.15 	50 	0.42 	yes
+PICE.MAR 0 	0.07 	20 	0.14 	40 	0.28 	20 	0.13 	50 	0.36 	999 	1 	yes
 
 >>IgnoredSpecies
 >>ACER.RUB
