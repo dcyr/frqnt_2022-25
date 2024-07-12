@@ -9,6 +9,8 @@ ForCSClimateFile	"ForCSClimateInput.txt"
 InitialCommunities      "./initial-communities.txt"
 InitialCommunitiesMap   "./initial-communities.tif"
 
+SnagFile "initial-snags.txt"
+
 
 ForCSOutput
 >>	Output interval

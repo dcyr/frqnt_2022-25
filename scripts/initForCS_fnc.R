@@ -14,6 +14,7 @@ initForCS <- function(forCSInput, ### a formatted Forest Carbon Succession input
                       allometry,
                       inputOffset = 0,
                       interpolate = F,
+                      includeSnags = F,
                       alignT0withBaseline = F,
                       valuesSingleAll = c("Timestep", "SeedingAlgorithm", "ForCSClimateFile",
                                           "InitialCommunities", "InitialCommunitiesMap"),
@@ -52,13 +53,34 @@ initForCS <- function(forCSInput, ### a formatted Forest Carbon Succession input
     lt <- colnames(forCS$AvailableLightBiomass$table)
     print("Done!")
     
-    
-    
-    ############################################################################
+        ############################################################################
     ### updating file names (if necessary)
     print("Preparing / updating 'ForCSClimateFile'...")
     forCS$ForCSClimateFile <-  "forCS-climate.txt"
     print("Done!")
+    
+    
+    ### updating file names (if necessary)
+    print("Preparing / updating 'SnagData'")
+    if(includeSnags) {
+      forCS$SnagFile <-  "init-snags.txt"
+      snags <- read.csv(paste0(inputPathLandis, "/snags_", a,".csv"))
+      snags[,"TimeSinceDeath"] <- t0-snags$YearOfDeath
+      snags<- snags[, c("species", "AgeAtDeath", "TimeSinceDeath", "Cause")]
+      if(as.numeric(version) >= 3.1) {
+        ### create file
+        snags_init_fnc(snags, file = paste0("initial-snags_", a, ".txt"))
+        print("Done!") 
+        ### remove snag section from main ForCS input file
+        forCS <- forCS[-which(names(forCS)=="SnagData")]
+      } else {
+        forCS$SnagData$SnagData$table <- snags
+      }
+    } else {
+      forCS <- forCS[-which(names(forCS)=="SnagData")]
+    }
+    print("Done!") 
+
     
     ############################################################################
     ### updating output timestep (if necessary)
@@ -469,12 +491,7 @@ initForCS <- function(forCSInput, ### a formatted Forest Carbon Succession input
                                                        breaks)
     print("Done!")
     
-    ############################################################################
-    #### SnagData
-    ## removing SnagData section
-    print("Preparing / updating 'SnagData'")
-    forCS <- forCS[-which(names(forCS)=="SnagData")]
-    print("Done!")
+
     
     ############################################################################
     #### SoilSpinUp
@@ -530,3 +547,4 @@ initForCS <- function(forCSInput, ### a formatted Forest Carbon Succession input
     return(out)
     
 }
+

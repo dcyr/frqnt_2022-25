@@ -5,7 +5,7 @@
 #############
 rm(list = ls())
 home <- path.expand("~")
-home <- gsub("/Documents", "", home) # necessary on my Windows machine
+#home <- gsub("/Documents", "", home) # necessary on my Windows machine
 setwd(paste(home, "Sync/Travail/ECCC/Landis-II/frqnt_2022-25", sep ="/"))
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
 dir.create(wwd)
@@ -26,13 +26,14 @@ inputDir <- inputPathLandis
 simDuration <- 100 #overridden if spinup == T
 forCSVersion <- "3.1"
 smoothAgeClasses <- T
-expDesign <- list(area = c("boreal-5a"),#temperate-2a-3b", "boreal-5a", "mixedwood-042-51"),#", "Hereford"
-                  scenario = c("baseline", "RCP45", "RCP85"),
+includeSnags <- T ## require snag tables, also will occupy some cohorts (no living trees allowed)
+expDesign <- list(area = c("temperate-2a-3b"),#temperate-2a-3b", "boreal-5a", "mixedwood-042-51"),#", "Hereford"
+                  scenario = c("baseline"),#c("baseline", "RCP45", "RCP85")
                   mgmt = list(#Hereford = "1"),#c("1", "2", "3", "4", "noHarvest")),
                     # "mixedwood-042-51" =  c("generic", "noHarvest")),
-                    "boreal-5a" =  c("generic", "noHarvest")),
-                  spinup = F,
-                  cropped  = list("boreal-5a" = T),
+                    "temperate-2a-3b" =  c("generic", "noHarvest")),
+                  spinup = T,
+                  cropped  = list("temperate-2a-3b" = T),
                   fire = T,
                   BDA = T,
                   wind = T,
@@ -60,6 +61,7 @@ for (a in names(expDesign$mgmt)) {
                               mgmt = expDesign$mgmt[[a]],
                               cropped = expDesign$cropped[[a]],
                               spinup = expDesign$spinup,
+                              includeSnags = includeSnags,
                               fire = expDesign$fire,
                               BDA = expDesign$BDA,
                               wind = expDesign$wind,
@@ -97,6 +99,7 @@ foreach(i = 1:nrow(simInfo)) %dopar% {
     fire <- simInfo[i,"fire"]
     wind <- simInfo[i,"wind"]
     BDA <- simInfo[i,"BDA"]
+    includeSnags <- simInfo[i,"includeSnags"]
     
     dir.create(simID)
     
@@ -133,6 +136,24 @@ foreach(i = 1:nrow(simInfo)) %dopar% {
                 paste0(simID, "/landtypes.tif"),
                 overwrite = T)
     }
+    
+    if(includeSnags) {
+      ### storing info to exclude adjust living cohort appropriately
+      fName <- paste0(inputDir, "/initial-snags_", areaName, ".txt")
+      snags <- read.table(fName, skip = 3,
+                        header = FALSE, comment.char = ">")
+      file.copy(paste0(fName),
+                paste0(simID, "/initial-snags.txt"),
+                overwrite = T)
+    }
+
+    #############################################
+    #############################################
+    ### adjust living cohort to snag cohorts
+    ## 
+    
+    #############################################
+    #############################################
     
     if(smoothAgeClasses) {
       spp <- read.table(paste0(inputDir, "/species_",areaName, ".txt"), skip = 1,

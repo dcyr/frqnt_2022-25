@@ -212,7 +212,7 @@ landisInputFetch <- function(input, type) { ## 'type' is one of 'BiomassSuccessi
     
     if(type == "ForCS") {
         valuesSingleAll <- c("Timestep", "SeedingAlgorithm", "ForCSClimateFile",
-                             "InitialCommunities", "InitialCommunitiesMap")
+                             "InitialCommunities", "InitialCommunitiesMap", "SnagFile")
         
         
         tablesAll <- c("ForCSOutput", "SoilSpinUp", "AvailableLightBiomass",

@@ -5,7 +5,7 @@
 #############
 rm(list = ls())
 home <- path.expand("~")
-home <- gsub("/Documents", "", home) # necessary on my Windows machine
+#home <- gsub("/Documents", "", home) # necessary on my Windows machine
 setwd(paste(home, "Sync/Travail/ECCC/Landis-II/frqnt_2022-25", sep ="/"))
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
 dir.create(wwd)
@@ -37,7 +37,7 @@ spuURL <- inputPathSPU
 #### Sourcing scripts
 source(paste(scriptPath, "CBMtoLANDIS_fnc.R", sep = "/"), encoding = "Windows-1252")
 source(paste(scriptPath, "initForCS_fnc.R", sep = "/"), encoding = "Windows-1252")
-
+source(paste(scriptPath, "initSnags_fnc.R", sep = "/"), encoding = "Windows-1252")
 ################################################################################
 landisInputs <- list.files(inputPathLandis)
 ### experiment specifics
@@ -51,6 +51,7 @@ climate <- T
 allometry <- T
 interpolate <- T
 alignT0withBaseline <- T
+includeSnags <- T ## 
 
 
 ################################################################################
@@ -77,9 +78,8 @@ for(a in area) {
     }
     
     landtypes <- raster(paste(inputPathLandis, landtypes, sep = "/"))
-    
     landtypeNames <- landtypes_AT[which(landtypes_AT$V1 == "yes"), "V3"]
-    
+
     #s <- "baseline"
     for(s in scenario) {
         
@@ -99,6 +99,7 @@ for(a in area) {
                   allometry = allometry,
                   t0 = t0,
                   scenario = s,
+                  includeSnags = includeSnags,
                   interpolate = interpolate,
                   alignT0withBaseline = alignT0withBaseline)
     }
