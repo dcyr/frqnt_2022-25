@@ -152,6 +152,17 @@ outputList <- foreach(i = dirIndex)  %dopar% {
                   bioToAir =  sum(bioToAir),
                   bioToFPS = sum(BioToFPS))
     
+    ## add a line for nonHosts for later merge
+    nonHostDF <- df  %>%
+        ungroup() %>%
+        filter(Dist == 4) %>%
+        dplyr::select(Time, row, column, ecoregion, Dist) %>%
+        distinct() %>%
+        mutate(species = "nonHosts", Dist = 4, bioToDOM = 0, bioToAir= 0,  bioToFPS = 0)
+
+    df <- rbind(df, nonHostDF) %>%
+        arrange(Time, row, column, species, Dist)
+    
     ## fetching pre dist agb
     bio <- agb %>%
         mutate(Time = Time + 1,
