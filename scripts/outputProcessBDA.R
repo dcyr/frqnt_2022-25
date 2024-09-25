@@ -1,6 +1,12 @@
 ###################################################################
 ###################################################################
-### ForCS output processing 
+### ForCS BDA output processing 
+### IMPORTANT - In other for this script to work, disturbances must be 
+### simulated in a particular order.
+###################################################################
+###################################################################
+###################################################################
+###################################################################
 rm(list = ls())
 home <- path.expand("~")
 home <- gsub("\\\\", "/", home)
@@ -180,5 +186,5 @@ for(i in seq_along(outputList)) {
     
 }
 fluxesBDA <-do.call("rbind", fluxesBDA)
-save(fluxesBDA, file = paste0("fluxesBDA_", simName, ".RData"))
+save(fluxesBDA, file = paste0("output_fluxesBDA_", simName, ".RData"))
 
