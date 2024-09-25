@@ -16,10 +16,10 @@ CellLength  250 << meters
 >> Disturbance Extensions   Initialization File
 >> ----------------------   -------------------
 >> "Base Wind" apparently has to run before "Base Fire", something related to the WindCurveTable in Base Fire.
-	"Base Wind"		    	base-wind.txt 
-	"Base Fire"		    	base-fire.txt
 	"Base BDA"		    	base-bda.txt
-	"Biomass Harvest"	    biomass-harvest.txt
+	"Base Wind"		    	base-wind.txt 
+	"Biomass Harvest"	    biomass-harvest.txt	
+	"Base Fire"		    	base-fire.txt
 >> DisturbancesRandomOrder  no  << optional parameter; default = no
 
 

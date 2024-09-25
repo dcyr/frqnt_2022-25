@@ -16,8 +16,8 @@ setwd(wwd)
 
 ### fetching outputs
 a <- "mixedwood-042-51"
-simDir <- paste0("D:/ForCS - mixedwood-042-51_prelimTest")#"
-simName <- gsub("ForCS - ", "", basename(simDir))
+simDir <- paste0("D:/simPkg_mixedwood-042-51_prelimTest/")#"
+simName <- gsub("simPkg_mixedwood-042-51_", "", basename(simDir))
 #simDir <- paste0("D:/ForCS - Test/2020-06-11")#"#Montmorency-Hereford"#"D:/ForCS - "
 simInfo <- read.csv(paste(simDir, "simInfo.csv", sep = "/"),
                     colClasses=c("simID"="character"))
