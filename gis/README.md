@@ -23,7 +23,7 @@ area (ha)
 
 Vegetation zone  | Description of study area | Study area | Simulation area | Testing area
 ------------- | ------------- | ------------- | ------------- | -------------
-Boreal  | Ecologication region 5a (Quebec)  | 2678106 ha  | 4081498 ha  | 53637 ha
+Boreal  | Management unit 085-51 | 1010528 ha  | 1686378 ha  | 105890 ha
 Mixedwoods  | Management unit 042-51 | 817867 ha   | 2196308 ha  | 66051 ha
 Temperate  | Ecologication region2a-3b (Quebec) | 1798432 ha   | 2899990 ha  | 57712 ha
 
@@ -34,6 +34,6 @@ Temperate  | Ecologication region2a-3b (Quebec) | 1798432 ha   | 2899990 ha  | 5
 
 
 
-Updated on May 10 2023
+Updated on Nov 05 2024
 
 
