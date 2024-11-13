@@ -145,10 +145,14 @@ outputList <- foreach(i = dirIndex)  %dopar% {
     fluxBio <- fread(file = paste(sDir, "log_FluxBio.csv", sep = "/"))
     
     df <- fluxBio %>%
-        mutate(bioToDOM = MERCH_ToDOM + FOL_ToDOM + CrsRt_ToDOM + FRt_ToDOM,
-               bioToAir = MERCH_ToAir + FOL_ToAir + CrsRt_ToAir + FRt_ToAir) %>%
+        mutate(AGBtoDOM_woody = MERCH_ToDOM + OtherWoody_ToDOM,
+               FOL_ToDOM = FOL_ToDOM,
+               BGBtoDOM = CrsRt_ToDOM + FRt_ToDOM,
+               bioToAir = MERCH_ToAir + FOL_ToAir + OtherWoody_ToAir + CrsRt_ToAir + FRt_ToAir) %>%
         group_by(Time, row, column, ecoregion, species, Dist) %>%
-        summarise(bioToDOM = sum(bioToDOM),
+        summarise(AGBtoDOM_woody = sum(AGBtoDOM_woody),
+                  FOL_ToDOM = sum(FOL_ToDOM),
+                  BGBtoDOM = sum(BGBtoDOM),
                   bioToAir =  sum(bioToAir),
                   bioToFPS = sum(BioToFPS))
     
@@ -158,7 +162,9 @@ outputList <- foreach(i = dirIndex)  %dopar% {
         filter(Dist == 4) %>%
         dplyr::select(Time, row, column, ecoregion, Dist) %>%
         distinct() %>%
-        mutate(species = "nonHosts", Dist = 4, bioToDOM = 0, bioToAir= 0,  bioToFPS = 0)
+        mutate(species = "nonHosts", Dist = 4,
+               AGBtoDOM_woody = 0, FOL_ToDOM = 0, BGBtoDOM = 0,
+               bioToAir= 0,  bioToFPS = 0)
 
     df <- rbind(df, nonHostDF) %>%
         arrange(Time, row, column, species, Dist)
@@ -166,15 +172,20 @@ outputList <- foreach(i = dirIndex)  %dopar% {
     ## fetching pre dist agb
     bio <- agb %>%
         mutate(Time = Time + 1,
-               bio = Wood + Leaf + CrsRoot + FineRoot,
+               #AGB = Wood + Leaf,
+               BGB = CrsRoot + FineRoot,
                species = ifelse(species %in% bdaSpp, species, "nonHosts")) %>%
         group_by(Time, row, column, ecoregion, mgmtID, species) %>%
-        summarise(bio = sum(bio))
+        summarise(AGB_woody = sum(Wood),
+                  Leaf = sum(Leaf),
+                  BGB = sum(BGB))
     
     df2 <- filter(df, Dist == 4) %>%
         mutate(Dist = names(d[which(d == 4)])) %>%
         merge(bio) %>%
-        dplyr::select(Time, row, column, ecoregion, mgmtID, Dist, species, bio, bioToDOM, bioToAir, bioToFPS) %>%
+        dplyr::select(Time, row, column, ecoregion, mgmtID, Dist, species,
+                      AGB_woody, Leaf, BGB,
+                      AGBtoDOM_woody, FOL_ToDOM, BGBtoDOM, bioToAir, bioToFPS) %>%
         arrange(Time, row, column, species)
     
     df2 <-  data.frame(areaName = areaName,
