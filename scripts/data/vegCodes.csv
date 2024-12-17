@@ -34,7 +34,7 @@ Code,commonName,scientificShort,scientificLong,LandisCode,qcCode,allometryCode
 306,"Alpine, amabilis, and grand fir",,"Abies lasiocarpa (Hook.) Nutt., Abies amabilis (Dougl. ex Loud.) Dougl. ex. J. Forbes,",NA,NA,NA
 320,Spruce and balsam fir,,Picea and Abies balsamea (L.) Mill.,NA,NA,NA
 321,Balsam fir and spruce,,Abies balsamea (L.) Mill. and Picea,NA,NA,NA
-400,Hemlock,,Tsuga,NA,NA,NA
+400,Eastern hemlock,Tsuga canadensis,Tsuga,TSUG.CAN,PRU,Eastern hemlock
 401,Eastern hemlock,Tsuga canadensis,Tsuga canadensis (L.) Carriﾊre,TSUG.CAN,PRU,Eastern hemlock
 402,Western hemlock,Tsuga heterophylla,Tsuga heterophylla (Raf.) Sarg.,TSUG.HET,NA,NA
 403,Mountain hemlock,Tsuga mertensiana,Tsuga mertensiana (Bong.) Carriﾊre,TSUG.MER,NA,NA
@@ -62,10 +62,10 @@ Code,commonName,scientificShort,scientificLong,LandisCode,qcCode,allometryCode
 1200,Poplar/aspen,Populus sp.,Populus,POPU.SPP,NA,NA
 1201,Trembling aspen,Populus tremuloides,Populus tremuloides Michx.,POPU.TRE,PET,Trembling aspen
 1202,European white poplar *,,Populus alba L.,NA,NA,NA
-1203,Balsam poplar,Populus balsamifera,Populus balsamifera L.,POPU.BAL,PEB,NA
+1203,Balsam poplar,Populus balsamifera,Populus balsamifera L.,POPU.BAL,PEB,Largetooth aspen
 1204,Black cottonwood,,Populus trichocarpa Torr. & A. Gray,POPU.TRI,NA,NA
-1205,Eastern cottonwood,,Populus deltoides Bartr. ex Marsh. ssp. deltoides,NA,PED,NA
-1206,Largetooth aspen,Populus grandidentata,Populus grandidentata Michx.,POPU.GRA,PEG,NA
+1205,Eastern cottonwood,,Populus deltoides Bartr. ex Marsh. ssp. deltoides,NA,PED,
+1206,Largetooth aspen,Populus grandidentata,Populus grandidentata Michx.,POPU.GRA,PEG,Largetooth aspen
 1207,Carolina poplar *,,Populus ??canadensis Moench cv. Eugenei,NA,NA,NA
 1208,Lombardy poplar *,,Populus nigra L. cv. Italica,NA,NA,NA
 1209,Hybrid poplar,,Populus sp. ? Populus  sp.,NA,NA,NA
@@ -74,7 +74,7 @@ Code,commonName,scientificShort,scientificLong,LandisCode,qcCode,allometryCode
 1301,Yellow birch,Betula alleghaniensis,Betula alleghaniensis Britt.,BETU.ALL,BOJ,Yellow birch
 1302,Cherry birch,,Betula lenta L.,NA,NA,NA
 1303,White birch,Betula papyrifera,Betula papyrifera Marsh.,BETU.PAP,BOP,White birch
-1304,Gray birch,,Betula populifolia Marsh.,NA,BOG,NA
+1304,Gray birch,,Betula populifolia Marsh.,BETU.POP,BOG,Grey birch
 1305,Alaska paper birch,,Betula neoalaskana Sarg.,NA,NA,NA
 1306,Mountain paper birch,,Betula cordifolia Regel,NA,NA,NA
 1307,Other birch,,NA,NA,NA,NA
@@ -84,7 +84,7 @@ Code,commonName,scientificShort,scientificLong,LandisCode,qcCode,allometryCode
 1403,Bigleaf maple,Acer macrophyllum,Acer macrophyllum Pursh,ACER.MAC,NA,NA
 1404,Manitoba maple,,Acer negundo L.,NA,ERG,NA
 1405,Red maple,Acer rubrum,Acer rubrum L.,ACER.RUB,ERR,Red Maple
-1406,Silver maple,,Acer saccharinum L.,NA,ERA,NA
+1406,Silver maple,,Acer saccharinum L.,ACER.SAC,ERA,Silver maple
 1407,Norway maple **,,Acer platanoides L.,NA,NA,NA
 1408,Sugar and black maple,,Acer saccharum Marsh. and Acer nigrum Michx.,NA,NA,NA
 1409,Other maple,,NA,NA,NA,NA
@@ -104,7 +104,7 @@ Code,commonName,scientificShort,scientificLong,LandisCode,qcCode,allometryCode
 1800,Alder,,Alnus,NA,AUR,NA
 1801,Sitka alder,,Alnus viridis  ssp. sinuata (Regel) ﾵ. Lﾔve & D. Lﾔve,NA,NA,NA
 1802,Red alder,Alnus rubra,Alnus rubra Bong.,ALNU.RUB,NA,NA
-1900,Ironwood (hop-hornbeam),,Ostrya virginiana (Mill.) K. Koch,NA,OSV,NA
+1900,Ironwood (hop-hornbeam),,Ostrya virginiana (Mill.) K. Koch,OSTR.VIR,OSV,Hop-Hornbeam
 1950,Blue-beech (American hornbeam),,Carpinus caroliniana Walt.,NA,CAR,NA
 2000,American beech,Fagus grandifolia,Fagus grandifolia Ehrh.,FAGU.GRA,HEG,American beech
 2100,Oak,,Quercus,NA,NA,NA
@@ -134,7 +134,7 @@ Code,commonName,scientificShort,scientificLong,LandisCode,qcCode,allometryCode
 2803,Bitter cherry,,Prunus emarginata Dougl.,NA,NA,NA
 2804,Choke cherry,,Prunus virginiana L. var. virginiana,NA,PRV,NA
 2900,Honey-locust ##,,Gleditsia triacanthos L.,NA,NA,NA
-3000,Basswood,,Tilia americana L.,NA,TIL,NA
+3000,Basswood,,Tilia americana L.,TILI.AME,TIL,Basswood
 3100,Black-gum ##,,Nyssa sylvatica Marsh.,NA,NA,NA
 3200,Flowering dogwood,,Cornus,NA,NA,NA
 3201,Eastern flowering dogwood,,Cornus florida L.,NA,NA,NA
@@ -142,11 +142,11 @@ Code,commonName,scientificShort,scientificLong,LandisCode,qcCode,allometryCode
 3203,Alternate-leaf dogwood,,Cornus alternifolia L. f.,NA,NA,NA
 3300,Arbutus,,Arbutus menziesii Pursh,NA,NA,NA
 3400,Ash,,Fraxinus spp,NA,NA,NA
-3401,White ash,Fraxinus americana,Fraxinus americana L.,FRAX.AME,FRA,NA
-3402,Black ash,Fraxinus nigra,Fraxinus nigra Marsh.,FRAX.NIG,FRN,NA
+3401,White ash,Fraxinus americana,Fraxinus americana L.,FRAX.AME,FRA,White ash
+3402,Black ash,Fraxinus nigra,Fraxinus nigra Marsh.,FRAX.NIG,FRN,Black ash
 3403,Red ash,,Fraxinus pennsylvanica Marsh.,NA,NA,NA
 3404,Northern red ash,,Fraxinus pennsylvanica var. austini Fern.,NA,NA,NA
-3405,Green ash,,Fraxinus pennsylvanica var. subintegerrima (Vahl) Fern.,NA,FRP,NA
+3405,Green ash,Fraxinus pennsylvanica,Fraxinus pennsylvanica var. subintegerrima (Vahl) Fern.,FRAX.PEN,FRP,Red ash
 3406,Blue ash,,Fraxinus quadrangulata Michx.,NA,NA,NA
 3407,Oregon ash,,Fraxinus latifolia Benth.,NA,NA,NA
 3408,Pumpkin ash ##,,Fraxinus profunda (Bush) Bush,NA,NA,NA

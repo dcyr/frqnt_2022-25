@@ -5,7 +5,7 @@
 #############
 rm(list = ls())
 home <- path.expand("~")
-#home <- gsub("/Documents", "", home) # necessary on my Windows machine
+home <- ifelse(Sys.info()["user"] == "dcyr-z840", gsub("/Documents", "", home))
 setwd(paste(home, "Sync/Travail/ECCC/Landis-II/frqnt_2022-25", sep ="/"))
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
 dir.create(wwd)
@@ -26,14 +26,18 @@ inputDir <- inputPathLandis
 simDuration <- 100 #overridden if spinup == T
 forCSVersion <- "3.1"
 smoothAgeClasses <- T
-includeSnags <- T ## require snag tables, also will occupy some cohorts (no living trees allowed)
-expDesign <- list(area = c("temperate-2a-3b"),#temperate-2a-3b", "boreal-5a", "mixedwood-042-51"),#", "Hereford"
-                  scenario = c("baseline"),#c("baseline", "RCP45", "RCP85")
+includeSnags <- F ## require snag tables, also will occupy some cohorts (no living trees allowed)
+expDesign <- list(area = c("temperate-2a-3b"),#"temperate-2a-3b","mixedwood-042-51", "boreal-085-51"),#, "mixedwood-042-51"),#", "Hereford"
+                  scenario = c("baseline", "RCP45", "RCP85"),
                   mgmt = list(#Hereford = "1"),#c("1", "2", "3", "4", "noHarvest")),
                     # "mixedwood-042-51" =  c("generic", "noHarvest")),
-                    "temperate-2a-3b" =  c("generic", "noHarvest")),
-                  spinup = T,
-                  cropped  = list("temperate-2a-3b" = T),
+                    "temperate-2a-3b" = c("generic", "noHarvest")),
+                    ##"mixedwood-042-51" =  c("generic", "noHarvest"),
+                    #"boreal-085-51" =  c("generic", "noHarvest")),# "noHarvest")),
+                  spinup = F,
+                  cropped  = list( "temperate-2a-3b" =  T),#
+                                   #"mixedwood-042-51" =  T,
+                                  # "boreal-085-51" = T),
                   fire = T,
                   BDA = T,
                   wind = T,
@@ -41,9 +45,9 @@ expDesign <- list(area = c("temperate-2a-3b"),#temperate-2a-3b", "boreal-5a", "m
                   rep = 1)
 
 
-# ### 2019-09-24
+# # ### 2019-09-24
 # expDesign <- list(#area = c("ForMont", "Hereford"),
-#                   scenario = c("baseline", "RCP85"),
+#                   scenario = c("baseline"),
 #                   mgmt = list(Hereford = c("1", "2", "3", "4"),
 #                               ForMont = c("0",
 #                                           "1")#,
@@ -379,7 +383,8 @@ foreach(i = 1:nrow(simInfo)) %dopar% {
 }
 stopCluster(cl)
 
-write.csv(simInfo, file = "simInfo.csv", row.names = F)
+write.csv(simInfo, file = "simInfo.csv", row.names = F,
+          fileEncoding = "UTF-8")
 
 ### simPilot.R
 file.copy("../scripts/simPilot.R",

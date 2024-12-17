@@ -291,9 +291,5 @@ RootDynamics
 	eco2	querelli	0		0.403		0.18		1		0.02
 	eco2	querelli	5000		0.292		0.1		0.6		0.02
 
-SnagData
->>Species   AgeAtDeath  TimeSinceDeath   DistType
-querelli        40           1             other
-pinubank        88           12            wind
 
 

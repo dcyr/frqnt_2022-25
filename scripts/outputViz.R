@@ -13,14 +13,14 @@ require(dplyr)
 
 initYear <- 2020
 unitConvFact <- 0.01 ### from gC /m2 to tonnes per ha
-simName <- "boreal-5a_prelimTest"
+simName <- "temperate-2a-3b_cropped"
 a <- ifelse(grepl("mixedwood-042-51", simName), "mixedwood-042-51",
-            ifelse(grepl("boreal-5a", simName), "boreal-5a",
+            ifelse(grepl("boreal-085-51", simName), "boreal-085-51",
                    ifelse(grepl("temperate-2a-3b", simName), "temperate-2a-3b")))
 
 areaName <- a
-# areaName <- ifelse(a == "ForMont", "Forêt Montmorency",
-#                    ifelse(a == "Hereford", "Forêt Hereford", a))
+# areaName <- ifelse(a == "ForMont", "For?t Montmorency",
+#                    ifelse(a == "Hereford", "For?t Hereford", a))
 
 require(ggplot2)
 require(dplyr)
@@ -32,7 +32,7 @@ require(scales)
 variableLvl <- c("TotalEcosys", "TotalDOM", "ABio", "BBio") ## ordering levels for plotting
 
 
-mgmtLevels <- list("boreal-5a" = c("generic" = "Generic",
+mgmtLevels <- list("boreal-085-51" = c("generic" = "Generic",
                                    #"CPI-CP" = "Couvert permanent",
                                    "noHarvest" = "Conservation"),
                    "mixedwood-042-51" = c("generic" = "Generic",
@@ -47,7 +47,7 @@ mgmtLvls <- c("CPRS", "Couvert permanent", "Conservation")
 
 
 
-cols <- list("boreal-5a" = c("Generic" = "black",
+cols <- list("boreal-085-51" = c("Generic" = "black",
                                     #"Couvert permanent" = "dodgerblue3",
                                     "Conservation" = "goldenrod3"),
              "mixedwood-042-51" = c("Generic" = "black",
@@ -57,7 +57,7 @@ cols <- list("boreal-5a" = c("Generic" = "black",
                                    #"Couvert permanent" = "dodgerblue3",
                                    "Conservation" = "goldenrod3"))
 
-scenRef <-  list("boreal-5a" = "generic",
+scenRef <-  list("boreal-085-51" = "generic",
                  "mixedwood-042-51" = "generic",
                  "temperate-2a-3b" = "generic")
 ################################################################################
@@ -152,9 +152,8 @@ p <- ggplot(df, aes(x = initYear+Time, y = value*unitConvFact,
          subtitle = paste(areaName, simName),
          x = "",
          y = expression(paste("tonnes C"," ha"^"-1","\n")),
-         caption = paste0("ABio : Aboveground biomass",
-                          "\nBBio : belowground biomass",
-                          "\nTotalDOM : Deadwood, litter, humus and mineral soil"))
+         caption = paste0("Allometric equations from: Ung et al. 2008. Canadian national biomass equations: new parameter estimates that include British Columbia data. Can. J. For. Res 38:1123-2232.\n",
+                          "Taper equations from: Honer et al. 1983. Metric timber tables for the commercial tree species of Central and Eastern Canada."))
 
 
     
@@ -229,7 +228,7 @@ dev.off()
 
 ################################################################################
 ################################################################################
-### to PFS
+### to FPS
 df <- fps %>%
     
     mutate(mgmtScenarioName = factor(mgmtLevels[[a]][match(as.character(mgmtScenario), names(mgmtLevels[[a]]))],
@@ -308,7 +307,7 @@ p <- ggplot(dfTotal, aes(x = initYear+Time, y = BioToFPS_tonnesCTotal,
          subtitle = paste(areaName, simName),
          x = "",
          y = expression(paste("harvested wood",))) 
-         #y = expression(paste("tonnes C"," ha"^"-1", "récolté","\n")))
+         #y = expression(paste("tonnes C"," ha"^"-1", "r?colt?","\n")))
 
 
 png(filename= paste0("fps_total_", simName, ".png"),
@@ -349,22 +348,21 @@ require(raster)
 # # sum(foo$agb_tonnesTotal)/totalArea
 
 
-
+##without the age classes
 df <- AGB %>%
-    mutate(mgmtScenarioName = factor(mgmtLevels[[a]][match(as.character(mgmtScenario), names(mgmtLevels[[a]]))],
-                                 levels = mgmtLevels[[a]])) %>%
-    group_by(areaName, scenario, mgmtScenario, mgmtScenarioName, 
-             Time, replicate,
-             # ageClass,
-             species) %>%
-    summarise(agb_tonnesTotal = sum(agb_tonnesTotal),
-              areaTotal_ha = sum(unique(landtypeArea_ha))) %>%
-    group_by(areaName, scenario, mgmtScenario, mgmtScenarioName,
-             #ageClass.
-             Time, species) %>%
-    summarise(agb_tonnesTotal = mean(agb_tonnesTotal),
-              areaTotal_ha = unique(areaTotal_ha)) %>%
-    as.data.frame()
+  group_by(areaName, scenario, mgmtScenario, mgmtScenarioName, 
+           Time, replicate,
+           species) %>%
+  summarise(agb_tonnesTotal = sum(agb_tonnesTotal),
+                                 areaTotal_ha = sum(unique(landtypeArea_ha))) %>%
+  group_by(areaName, scenario, mgmtScenario, mgmtScenarioName,
+           Time, species) %>%
+  summarise(agb_tonnesTotal = mean(agb_tonnesTotal),
+            areaTotal_ha = unique(areaTotal_ha)) %>%
+  as.data.frame()
+
+  
+
 
 require(RColorBrewer)
 
@@ -421,27 +419,7 @@ ggplot(df, aes(x = 2020+Time, y = agb_tonnesTotal/areaTotal_ha,
 
 dev.off()
 # 
-# ################################################################################
-# ### stacked (age classes)
-# cols = brewer.pal(n = 9, name = 'Greens')[3:9]
-# ################################################################################
-# png(filename= paste0("agb_AgeClassStacked_", a, ".png"),
-#     width = 10, height = 20, units = "in", res = 600, pointsize=10)
-# 
-# ggplot(df, aes(x = 2020+Time, y = agb_tonnesTotal/totalManagedArea)) +
-#     stat_summary(aes(fill = ageClass), fun.y="sum", geom="area", position = "stack") +
-#     facet_grid(species ~ scenario, scales = "free_y") +
-#     scale_fill_manual(values = cols)+
-#     theme_dark() +
-#     theme(plot.caption = element_text(size = rel(.5), hjust = 0),
-#           axis.text.x = element_text(angle = 45, hjust = 1)) +
-#     labs(title = "?volution de la composition forestière de la MRC Maskinong?\nBiomasse aérienne* par classes d'?ge",
-#          x = "",
-#          y = expression(paste("tonnes"," ha"^"-1")),
-#          caption = "*Les valeurs sont exprim?es ici en terme de poids sec (biomasse), et non de carbone")
-# 
-# 
-# dev.off()
+
 
 
 ################################################################################
@@ -450,41 +428,7 @@ dev.off()
 ### Aboveground biomass (by age classes)
 ################################################################################
 ####
-
-
-
-
-# df <- AGB %>%
-#     mutate(mgmtScenario = factor(mgmtLevels[[a]][match(as.character(mgmtScenario), names(mgmtLevels[[a]]))],
-#                                  levels = mgmtLevels[[a]])) %>%
-#     mutate(plantedSp = ifelse(grepl("EPB", mgmtScenario), "P. glauca",
-#                           ifelse(grepl( "EPN", mgmtScenario), "P. mariana",
-#                                  ifelse(grepl("EPR", mgmtScenario), "P. rubens", "N/A"))),
-#        mgmt = factor(gsub(" - |EPN|EPB|EPR", "", mgmtScenario), levels = mgmtLvls)) %>%
-#     group_by(areaName, scenario, mgmtScenario,
-#              ##################
-#              plantedSp, ageClass, mgmt,
-#              Time, replicate,
-#              # ageClass,
-#              species) %>%
-#     summarise(agb_tonnesTotal = sum(agb_tonnesTotal),
-#               areaTotal_ha = sum(unique(landtypeArea_ha))) %>%
-#     group_by(areaName, scenario, mgmtScenario,
-#              ##################
-#              plantedSp, ageClass, mgmt,
-#              #ageClass.
-#              Time, species) %>%
-#     summarise(agb_tonnesTotal = mean(agb_tonnesTotal),
-#               areaTotal_ha = unique(areaTotal_ha)) %>%
-#     group_by(areaName, scenario, mgmtScenario,
-#              ##################
-#              plantedSp, ageClass, mgmt,
-#              #ageClass.
-#              Time) %>%
-#     summarise(agb_tonnesTotal = sum(agb_tonnesTotal),
-#               areaTotal_ha = unique(areaTotal_ha)) %>%
-#     as.data.frame()
-
+cols = brewer.pal(n = 9, name = 'Greens')[3:9]
 ##########################
 
 df <- AGB %>%

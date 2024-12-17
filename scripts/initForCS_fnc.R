@@ -17,15 +17,15 @@ initForCS <- function(forCSInput, ### a formatted Forest Carbon Succession input
                       includeSnags = F,
                       alignT0withBaseline = F,
                       valuesSingleAll = c("Timestep", "SeedingAlgorithm", "ForCSClimateFile",
-                                          "InitialCommunities", "InitialCommunitiesMap"),
+                                          "InitialCommunities", "InitialCommunitiesMap",
+                                          "SnagFile"),
                       tablesAll = c("ForCSOutput", "SoilSpinUp", "AvailableLightBiomass",
-                                    "LightEstablishmentTable", "arameters",
+                                    "LightEstablishmentTable", "SpeciesParameters",
                                     "DOMPools", "EcoSppDOMParameters", "ForCSProportions",
                                     "DisturbFireTransferDOM", "DisturbOtherTransferDOM",
                                     "DisturbFireTransferBiomass", "DisturbOtherTransferBiomass",
                                     "ANPPTimeSeries", "MaxBiomassTimeSeries",
-                                    "EstablishProbabilities", "RootDynamics",
-                                    "SnagData"), ...) {### other arguments may be required for some functions
+                                    "EstablishProbabilities", "RootDynamics"), ...) {### other arguments may be required for some functions
     
     print("Fetching Landis inputs and templates...")
     ### fetching source formatted Landis Biomass Succession inputs
@@ -63,6 +63,7 @@ initForCS <- function(forCSInput, ### a formatted Forest Carbon Succession input
     ### updating file names (if necessary)
     print("Preparing / updating 'SnagData'")
     if(includeSnags) {
+
       forCS$SnagFile <-  "init-snags.txt"
       snags <- read.csv(paste0(inputPathLandis, "/snags_", a,".csv"))
       snags[,"TimeSinceDeath"] <- t0-snags$YearOfDeath
@@ -76,10 +77,13 @@ initForCS <- function(forCSInput, ### a formatted Forest Carbon Succession input
       } else {
         forCS$SnagData$SnagData$table <- snags
       }
+      
     } else {
-      forCS <- forCS[-which(names(forCS)=="SnagData")]
+      ######### placeholder
+      forCS <- forCS[-which(names(forCS)=="SnagFile")]
     }
     print("Done!") 
+    
 
     
     ############################################################################
@@ -105,6 +109,10 @@ initForCS <- function(forCSInput, ### a formatted Forest Carbon Succession input
     print("Preparing / updating 'SpeciesParameters'")
     forCS$SpeciesParameters$table <- SpeciesParameterFetch(bsMain,
                                                            aidbURL = aidbURL)
+    ### rounding shape parameter values 
+    forCS$SpeciesParameters$table[,3] <- round(forCS$SpeciesParameters$table[,3], 2)
+    forCS$SpeciesParameters$table[,8] <- round(forCS$SpeciesParameters$table[,8], 3)
+    
     
     ## minimum age for merchantable stems
     # (should be revised
@@ -130,66 +138,188 @@ initForCS <- function(forCSInput, ### a formatted Forest Carbon Succession input
     #forCS$SpeciesParameters$table[,4] <- merchMinAge[forCS$SpeciesParameters$table[,1]]
     
     if (allometry) {
-      source("../scripts/dhpToAge_fnc.R")
+      source("../scripts/allometry_fnc.R")
       dhpToAge <- dhpToAge_fnc(sp = spp, landtypes = landtypes)
-      source("../scripts/allometry.R")
       vegCodes <- read.csv("../scripts/data/vegCodes.csv")
       sppLandis <- forCS$SpeciesParameters$table[,1]
       
+      # ### Chapman-Richard function (reverse, dbh to age)
+      # crInverse <- function(y, d, z, c) {
+      #   -1 / z * log(1 - (y / d)^(1 / c))
+      # }
+      # 
       
-      dhp <- 1:100 # cm
-      for(i in seq_along(dhpToAge)) {
-        fit <-  dhpToAge[[i]][["model"]]
-        age <- ((dhp*10)^2)/fit$coefficients
-        #age[age<0] <- 0
-        #age <- sar_pred(fit, dbh)
-        for (sp in dhpToAge[[i]][["sppLandis"]]) {
-          ageCorr <- age + dhpToAge[[i]]$ageDelta[[sp]]
-          ageCorr <- data.frame(dhp, ageCorr)
-          sppAllo <- vegCodes[match(sp, vegCodes$LandisCode), "allometryCode"]
-          x <- biomass_tree_fcn(sp = sppAllo,
-                                dbh = dhp)
-          x <- x %>%
-            group_by(Species_en, dbh) %>%
-            mutate(ratio = biomass_kg/sum(biomass_kg),
-                   biomassTotal_kg = sum(biomass_kg))
-          
-          
-          ### Woody biomass total
-          x <- x %>%
-            filter(Component_en != "Foliage") %>%
-            group_by(Species_en, dbh) %>%
-            mutate(woodyBiomassRatio = biomass_kg/sum(biomass_kg)) %>%
-            filter(Component_en == "Wood") %>%
-            mutate(merchProp = volM_to_volTot(dbh = dbh,
-                                              dTop = 7,
-                                              stumpHeight = .15,
-                                              height = 15)) %>%
-            mutate(propStem = woodyBiomassRatio*merchProp)  %>%
-            merge(ageCorr, by.x = "dbh", by.y = "dhp") %>%
-            filter(ageCorr <= 250)
-
-          ## pred
-          index <- which.max(x$propStem)
-          aParam <- round(x[index, "propStem"], 3) 
-          minAge <- round(x[min(which(x$propStem >0)), "ageCorr"])
-          bParam <- ifelse(minAge>25, 0.97,
-                      ifelse(minAge>20, 0.95, 0.925))
-          
-          # pred <-  aParam*(1-bParam^x$ageCorr)   
-          # plot(x$ageCorr, x$propStem, type = "l", xlim = c(0,250))
-          # lines(x$ageCorr, pred, col = "red")
-          # predThresh <- pred
-          # predThresh[x$age<minAge] <- 0
-          # lines(x$age, predThresh, col = "blue")
-        
-          index <- which(forCS$SpeciesParameters$table[,1] == sp)
-          forCS$SpeciesParameters$table[index,4] <- minAge
-          forCS$SpeciesParameters$table[index,5] <- aParam
-          forCS$SpeciesParameters$table[index,6] <- bParam
-        }
+      # ### Chapman-Richard function (reverse, dbh to age)
+      # crInverse <- function(y, d, z, c) {
+      #   -1 / z * log(1 - (y / d)^(1 / c))
+      # }
+      # 
+      # Define the inverse Chapman-Richards function
+      inverse_chapman_richards <- function(y, A, k, m, t0) {
+        #if (any(y >= A | y <= 0)) stop("y must be between 0 and A.")
+        t0 - (1 / k) * log(1 - (y / A)^(1 / m))
       }
+      
+      for(i in seq_along(dhpToAge)) {
+        dhp <- 1:100 # cm
+        fit <-  dhpToAge[[i]]$model
+        type <- dhpToAge[[i]]$modelType
+        corr <- dhpToAge[[i]]$ageDelta
+        if(type == "linear") {
+          age <- (dhp*10)/fit$coefficients
+        }
+        if(type == "Chapman-Richards") {
+          params <- coef(fit)
+          
+          age <- numeric()
+          for(j in dhp) {
+            age <-  append(age, inverse_chapman_richards(y = j*10,
+                              A = params[1],
+                              k = params[2],
+                              m = params[3],
+                              t0 = params[4])
+                           ) 
+          }
 
+        }
+      
+          
+        for (sp in dhpToAge[[i]]$sppLandis) {
+            ageCorr <- age + dhpToAge[[i]]$ageDelta[[sp]]
+            ageCorr <- data.frame(dhp, ageCorr)
+            sppAllo <- vegCodes[match(sp, vegCodes$LandisCode), "allometryCode"]
+            x <- biomass_tree_fcn(sp = sppAllo,
+                                  dbh = dhp)
+            x <- x %>%
+              group_by(Species_en, dbh) %>%
+              mutate(ratio = biomass_kg/sum(biomass_kg),
+                     biomassTotal_kg = sum(biomass_kg))
+            
+            
+            ### Woody biomass total
+            x <- x %>%
+              filter(Component_en != "Foliage") %>%
+              group_by(Species_en, dbh) %>%
+              mutate(woodyBiomassRatio = biomass_kg/sum(biomass_kg)) %>%
+              filter(Component_en == "Wood") %>%
+              mutate(merchProp = volM_to_volTot(dbh = dbh,
+                                                dTop = 7,
+                                                stumpHeight = .15,
+                                                height = 15)) %>%
+              mutate(propStem = woodyBiomassRatio*merchProp)  %>%
+              merge(ageCorr, by.x = "dbh", by.y = "dhp") %>%
+              filter(ageCorr <= 150)
+      
+            ## pred
+            index <- which.max(x$propStem)
+            aParamSeed <- round(x[index, "propStem"], 3) 
+            minAge <- round(x[min(which(x$propStem >0)), "ageCorr"])
+            # bParam <- ifelse(minAge>25, 0.97,
+            #             ifelse(minAge>20, 0.95, 0.925))
+            # 
+            # bParam <- .9
+            # bParam <- .925
+            # bParam <- .95
+            # bParam <- .975
+            # bParam <- .99
+            # 
+            #### looking for the best pParam value
+            aParamVals <- round(seq(from = .85*aParamSeed, to = 1.15*aParamSeed, length.out = 25), 3)
+            bParamVals <- seq(from = 0.9, to = 0.99, by =0.005)
+            
+            ageMin <- c(round(0.8*minAge), round(1.2*minAge))
+            ageMin <-  seq(from = min(ageMin),  max(ageMin), by = 1)
+              
+            paramGrid <- expand.grid(aParamVals, bParamVals, ageMin)
+            #
+            rsq <- mae <- mse <- numeric()
+            
+            for (k in 1:nrow(paramGrid)) {
+              aParam <- paramGrid[k, 1] 
+              bParam <- paramGrid[k, 2] 
+              pred <-  aParam*(1-bParam^x$ageCorr)
+              predThresh <- pred
+              predThresh[x$age<paramGrid[k,3]] <- 0
+              if(k == 1) {
+                tmp <- predThresh
+              } else {
+                tmp <- cbind(tmp, predThresh)
+              }
+              rsq <- append(rsq, cor(x$propStem, predThresh)^2)
+              mae <- append(mae, mean(abs((x$propStem-predThresh))))
+              mse <- append(mse, mean((x$propStem-predThresh)^2))
+            }
+            ### minimizing the MAE
+            paramBestFit <- paramGrid[which.min(mse),]
+            
+            ####### plotting 
+            dfTmp <- data.frame(spp = sp,
+                                ageCorr = x$ageCorr,
+                                reference = x$propStem,
+                                prediction = tmp[,which.min(mse)],
+                                aParam = paramBestFit[,1],
+                                bParam = paramBestFit[,2],
+                                minAge = paramBestFit[,3])
+            if (i == 1 &
+                sp == dhpToAge[[1]]$sppLandis[[1]]) {
+              dfPlot <- dfTmp
+            } else {
+              dfPlot <- rbind(dfPlot, dfTmp)
+            }
+            
+            # for (k in 1:ncol(tmp)) {
+            #   lines(x$ageCorr, tmp[,k], col = "red")
+            # }
+            #lines(x$ageCorr, tmp[,which.max(rsq)], col = "blue")
+            #lines(x$ageCorr, tmp[,which.min(mae)], col = "green")
+            #lines(x$ageCorr, tmp[,which.min(mse)], col = "darkgreen")
+            
+            index <- which(forCS$SpeciesParameters$table[,1] == sp)
+            forCS$SpeciesParameters$table[index,4] <- paramBestFit[,3]
+            forCS$SpeciesParameters$table[index,5] <- paramBestFit[,1]
+            forCS$SpeciesParameters$table[index,6] <- paramBestFit[,2]
+          print(sp)
+          }
+      }
+      
+      
+      dfPlot <- filter(dfPlot, spp %in% species[,1]) %>%
+        pivot_longer(reference:prediction, names_to = "group", values_to = "propMerch") %>%
+        mutate(groupLabel = ifelse(group == "prediction", "Landis-II / ForCS", "reference*"))
+      
+
+      
+      
+      p <- ggplot(dfPlot, aes(x = ageCorr, y = propMerch, colour = group)) +
+        facet_wrap(vars(spp)) +
+        theme_bw() +
+        scale_x_continuous(limits = c(0, 150)) +
+        #scale_color_manual(name = "Management\nscenario",
+        #                   values = cols[[a]]) +
+        
+        geom_line(linewidth =0.75) + #+
+        scale_color_manual(name = "",
+                           labels = dfPlot$groupLabel,
+                           values = c("darkolivegreen", "darkgoldenrod1"))+
+        theme(plot.caption = element_text(size = rel(.6), hjust = 1),
+              axis.text.x = element_text(angle = 45, hjust = 1)) +
+        labs(title = "Proportion of AGB that is merchantable",
+             subtitle = paste0("Study area: ", a),
+             #subtitle = paste(areaName, simName),
+             x = "Cohort age", y = "Merchantable fraction of AGB",
+             #y = expression(paste("tonnes C"," ha"^"-1","\n")),
+             caption = paste0("*Reference values are based on tree-level allometric equations from Ung et al. 2008. Can. J. For. Res 38:1123-2232 and regional dbh to age relationship."))
+        
+        
+      png(filename= paste0("allometry_AGBtoMerch_", a, ".png"),
+          width = 9, height = 6, units = "in", res = 600, pointsize=10)
+      
+      print(p)
+      
+      dev.off()
+      
+      
+      
       print("Done!")
     } else {
       # Merch Curve shape params a and b (from Dymond et al 2016)

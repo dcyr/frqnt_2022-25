@@ -1,8 +1,8 @@
 # df <- DOMPool_fetch(x = "C:/Users/dcyr-z840/Sync/Travail/ECCC/Landis-II/Montmorency-Hereford/2020-03-03/0/log_Pools.csv",
 #               ltTxt = "C:/Users/dcyr-z840/Sync/Travail/ECCC/Landis-II/Montmorency-Hereford/2020-03-03/0/landtypes.txt")
 # write.csv(df, file = "DOM-initPools_Hereford.csv", row.names = F)
-df <- DOMPool_fetch(x = "D:/ForCS - temperate-2a-3b/0/log_Pools.csv",
-                    ltTxt = "D:/ForCS - temperate-2a-3b/0/landtypes.txt")
+df <- DOMPool_fetch(x = "D:/ForCS - test spinup/0/log_Pools.csv",
+                    ltTxt = "D:/ForCS - test spinup/0/landtypes.txt")
 write.csv(df, file = "DOM-initPools_temperate-2a-3b.csv", row.names = F)
 # df <- DOMPool_fetch(x = "C:/Users/dcyr-z840/Sync/Travail/ECCC/Landis-II/Montmorency-Hereford/2020-02-26/2/log_Pools.csv",
 #                     ltTxt = "C:/Users/dcyr-z840/Sync/Travail/ECCC/Landis-II/Montmorency-Hereford/2020-02-26/2/landtypes.txt")

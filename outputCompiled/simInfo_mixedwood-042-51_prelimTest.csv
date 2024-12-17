@@ -1,7 +1,0 @@
-"simID","areaName","scenario","mgmt","cropped","spinup","fire","BDA","wind","harvest","replicate"
-"0","mixedwood-042-51","baseline","generic",TRUE,FALSE,TRUE,TRUE,TRUE,TRUE,1
-"1","mixedwood-042-51","RCP45","generic",TRUE,FALSE,TRUE,TRUE,TRUE,TRUE,1
-"2","mixedwood-042-51","RCP85","generic",TRUE,FALSE,TRUE,TRUE,TRUE,TRUE,1
-"3","mixedwood-042-51","baseline","noHarvest",TRUE,FALSE,TRUE,TRUE,TRUE,FALSE,1
-"4","mixedwood-042-51","RCP45","noHarvest",TRUE,FALSE,TRUE,TRUE,TRUE,FALSE,1
-"5","mixedwood-042-51","RCP85","noHarvest",TRUE,FALSE,TRUE,TRUE,TRUE,FALSE,1

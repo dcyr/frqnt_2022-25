@@ -1012,17 +1012,20 @@ tMean_fetch <- function(landtypes, landtypes_AT,
     print("Fetching and formatting mean annual temperature ...")
     
     # fetching and formatting observation data
-    tMean <- getData('worldclim', var="tmean", res=5)
-    tMean <- projectRaster(tMean, landtypes, method = 'ngb')
-    tMean <- resample(tMean, landtypes)
+    tMean <- worldclim_country(country = "Canada", var="tavg", path = getwd(), res=10)
+    #tMean <- getData('worldclim', var="tmean", res=5)
+    #tMean <- projectRaster(tMean, landtypes, method = 'ngb')
+    tMean <- project(tMean, landtypes, method = 'near')
+    tMean <- resample(tMean, rast(landtypes))
     # averaging year
-    tMean_baseline <- mean(tMean/10)
+    tMean_baseline <- mean(tMean)
     
     # computing zonal (landtypes) statistics
     index <- match(values(landtypes), landtypes_AT$V2)
     # 
-    tMean_landtype <- zonal(tMean_baseline, landtypes, fun = "mean")
-    tMeanOutput <- data.frame(year = 0,
+    tMean_landtype <- zonal(tMean_baseline, rast(landtypes), fun = "mean")
+    colnames(tMean_landtype)[1] <- "zone"
+    tMeanOutput <- data.frame(year = 0, 
                         tMean_landtype)
 
     if(scenario != "baseline") {
@@ -1079,7 +1082,7 @@ tMean_fetch <- function(landtypes, landtypes_AT,
         }
       }
      
-      tMean_landtype <- tMeanOutput
+      
       
       
     } else {
@@ -1089,6 +1092,8 @@ tMean_fetch <- function(landtypes, landtypes_AT,
     
     #rounding
     tMean_landtype[,"mean"] <- round(tMean_landtype[,"mean"], 3) 
+    tMean_landtype <- tMeanOutput %>%
+      filter(zone != 0)
     
     if(writeToFile) {
     

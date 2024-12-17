@@ -10,7 +10,9 @@
 rm(list = ls())
 home <- path.expand("~")
 home <- gsub("\\\\", "/", home)
-home <- gsub("/Documents", "", home) # necessary on my Windows machine
+home <- ifelse(Sys.info()["user"] == "dcyr-z840",
+               gsub("/Documents", "", home),
+               home)
 setwd(paste(home, "Sync/Travail/ECCC/Landis-II/frqnt_2022-25/", sep = "/"))
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
 
@@ -25,7 +27,7 @@ source("../scripts/fetchBDAParamFnc.R")
 ### fetching outputs
 a <- "mixedwood-042-51"
 d <- c( "bda" = 4, "wind" = 3, "harvest" = 2, "fire" = 1) #### IMPORTANT: put in the order they were simulated in LANDIS
-simDir <- paste0("D:/simPkg_mixedwood-042-51_prelimTest/")#"
+simDir <- paste0("C:/Users/cyrdo/Desktop/tmp/")#"
 simName <- gsub("simPkg_mixedwood-042-51_", "", basename(simDir))
 #simDir <- paste0("D:/ForCS - Test/2020-06-11")#"#Montmorency-Hereford"#"D:/ForCS - "
 simInfo <- read.csv(paste(simDir, "simInfo.csv", sep = "/"),
@@ -42,7 +44,7 @@ require(parallel)
 require(foreach)
 require(stringr)
 
-clusterN <- 4
+clusterN <- 1
 #######
 cl = makeCluster(clusterN, outfile = "") ##
 registerDoSNOW(cl)
@@ -144,9 +146,11 @@ outputList <- foreach(i = dirIndex)  %dopar% {
     ### Disturbance type ID: 1=fire, 2=harvest, 3=wind, 4=bda
     fluxBio <- fread(file = paste(sDir, "log_FluxBio.csv", sep = "/"))
     
+    
+    
+    
     df <- fluxBio %>%
         mutate(AGBtoDOM_woody = MERCH_ToDOM + OtherWoody_ToDOM,
-               FOL_ToDOM = FOL_ToDOM,
                BGBtoDOM = CrsRt_ToDOM + FRt_ToDOM,
                bioToAir = MERCH_ToAir + FOL_ToAir + OtherWoody_ToAir + CrsRt_ToAir + FRt_ToAir) %>%
         group_by(Time, row, column, ecoregion, species, Dist) %>%
@@ -154,8 +158,10 @@ outputList <- foreach(i = dirIndex)  %dopar% {
                   FOL_ToDOM = sum(FOL_ToDOM),
                   BGBtoDOM = sum(BGBtoDOM),
                   bioToAir =  sum(bioToAir),
-                  bioToFPS = sum(BioToFPS))
-    
+                  bioToFPS = sum(BioToFPS)) %>%
+        arrange(Time, row, column, ecoregion, species, Dist)
+    # 
+
     ## add a line for nonHosts for later merge
     nonHostDF <- df  %>%
         ungroup() %>%

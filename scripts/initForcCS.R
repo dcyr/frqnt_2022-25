@@ -5,7 +5,9 @@
 #############
 rm(list = ls())
 home <- path.expand("~")
-#home <- gsub("/Documents", "", home) # necessary on my Windows machine
+home <- ifelse(Sys.info()["user"] == "dcyr-z840",
+               gsub("/Documents", "", home),
+               home)
 setwd(paste(home, "Sync/Travail/ECCC/Landis-II/frqnt_2022-25", sep ="/"))
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
 dir.create(wwd)
@@ -19,6 +21,7 @@ require(broom)
 require(dplyr)
 require(maptools)
 require(RCurl)
+require(geodata)
 
 
 ################################################################################
@@ -41,8 +44,8 @@ source(paste(scriptPath, "initSnags_fnc.R", sep = "/"), encoding = "Windows-1252
 ################################################################################
 landisInputs <- list.files(inputPathLandis)
 ### experiment specifics
-scenario <- c("baseline", "RCP45", "RCP85")#, 
-area <-  "temperate-2a-3b"#c("boreal-5a", "mixedwood-042-51", "temperate-2a-3b")
+scenario <- c("baseline", "RCP45", "RCP85")#, c("baseline", "RCP45", "RCP85")
+area <-c("temperate-2a-3b", "mixedwood-042-51", "boreal-085-51") #"temperate-2a-3b" #"mixedwood-042-51"#,#c( "temperate-2a-3b","mixedwood-042-51", "boreal-085-51")#,"mixedwood-042-51", "boreal-085-51")#, "temperate-2a-3b", "boreal-085-51")##, "boreal-085-51") "boreal-085-51"  #c("mixedwood-042-51", "temperate-2a-3b", "boreal-085-51")
 t0 <- 2020
 inputOffset <- 0 
 version <- "3.1"
@@ -51,12 +54,12 @@ climate <- T
 allometry <- T
 interpolate <- T
 alignT0withBaseline <- T
-includeSnags <- T ## 
+includeSnags <- F ## 
 
 
 ################################################################################
 # might want to create loops here, or a function
-a <- area
+#a <- area[1]
 for(a in area) {
         
     ### fetch species.txt
@@ -85,9 +88,11 @@ for(a in area) {
         
         ### fetching succession extensions inputs and template
         bsMainInput <- paste0("../inputsLandis/biomass-succession-main-inputs_",
-                              a,"_", s, ".txt")
+                              a, ".txt")
+        # bsMainInput <- paste0("../inputsLandis/biomass-succession-main-inputs_",
+        #                       a,"_", s, ".txt")
         bsDynInput <-  paste0("../inputsLandis/biomass-succession-dynamic-inputs_",
-                              a, "_", s, "_BiasCorrected.txt")
+                              a, "_", s, ".txt")
         forCSInput <- paste0("../inputsLandis/forCS-input_template.txt")
             
 
