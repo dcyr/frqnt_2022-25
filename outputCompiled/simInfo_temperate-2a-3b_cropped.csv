@@ -1,7 +1,0 @@
-"simID","areaName","scenario","mgmt","cropped","spinup","includeSnags","fire","BDA","wind","harvest","replicate"
-"0","temperate-2a-3b","baseline","generic",TRUE,FALSE,FALSE,TRUE,TRUE,TRUE,TRUE,1
-"1","temperate-2a-3b","RCP45","generic",TRUE,FALSE,FALSE,TRUE,TRUE,TRUE,TRUE,1
-"2","temperate-2a-3b","RCP85","generic",TRUE,FALSE,FALSE,TRUE,TRUE,TRUE,TRUE,1
-"3","temperate-2a-3b","baseline","noHarvest",TRUE,FALSE,FALSE,TRUE,TRUE,TRUE,FALSE,1
-"4","temperate-2a-3b","RCP45","noHarvest",TRUE,FALSE,FALSE,TRUE,TRUE,TRUE,FALSE,1
-"5","temperate-2a-3b","RCP85","noHarvest",TRUE,FALSE,FALSE,TRUE,TRUE,TRUE,FALSE,1

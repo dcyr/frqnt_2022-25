@@ -5,7 +5,7 @@
 #############
 rm(list = ls())
 home <- path.expand("~")
-home <- ifelse(Sys.info()["user"] == "dcyr-z840", gsub("/Documents", "", home))
+home <- ifelse(Sys.info()["user"] == "dcyr-z840", gsub("/Documents", "", home), home)
 setwd(paste(home, "Sync/Travail/ECCC/Landis-II/frqnt_2022-25", sep ="/"))
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
 dir.create(wwd)
@@ -23,27 +23,39 @@ require(dplyr)
 inputDir <- inputPathLandis
 
 
-simDuration <- 100 #overridden if spinup == T
+simDuration <- 75 #overridden if spinup == T
+t0 <- 2020 ### should be the same as t0 from initForCS.R
+
+
+
+###
 forCSVersion <- "3.1"
 smoothAgeClasses <- T
 includeSnags <- F ## require snag tables, also will occupy some cohorts (no living trees allowed)
-expDesign <- list(area = c("temperate-2a-3b"),#"temperate-2a-3b","mixedwood-042-51", "boreal-085-51"),#, "mixedwood-042-51"),#", "Hereford"
-                  scenario = c("baseline", "RCP45", "RCP85"),
+expDesign <- list(area = c("mixedwood-042-51"),#temperate-2a-3b", "boreal-5a", "mixedwood-042-51"),#", "Hereford"
+                  scenario = c("baseline"),#c("baseline", "RCP45", "RCP85")
                   mgmt = list(#Hereford = "1"),#c("1", "2", "3", "4", "noHarvest")),
                     # "mixedwood-042-51" =  c("generic", "noHarvest")),
-                    "temperate-2a-3b" = c("generic", "noHarvest")),
-                    ##"mixedwood-042-51" =  c("generic", "noHarvest"),
-                    #"boreal-085-51" =  c("generic", "noHarvest")),# "noHarvest")),
+                    "mixedwood-042-51" =  c("generic","noHarvest")), #noHarvest
                   spinup = F,
-                  cropped  = list( "temperate-2a-3b" =  T),#
-                                   #"mixedwood-042-51" =  T,
-                                  # "boreal-085-51" = T),
-                  fire = T,
-                  BDA = T,
-                  wind = T,
-                  harvest = T,
-                  rep = 1)
+                  cropped  = list("mixedwood-042-51" = F),
+                  rep = 2,
+                  #ND natural disturbances 
+                  ND = data.frame(
+                    wind = c(FALSE, TRUE, TRUE, TRUE),
+                    BDA = c(FALSE, FALSE, TRUE, TRUE),
+                    fire = c(FALSE, FALSE, FALSE, TRUE),
+                    ND_scenario=c("No_ND","Wind","Wind_Sbw","Wind_Sbw_Fire")
+                  )
+)
 
+
+### BDA params
+bdaParams <- list(ongoingAtT0 = F, ### HAS NOT BEEN TESTED WHEN TRUE ###
+                  cycleMean = 35, ###NRCan entre 30 et 40 ans
+                  cycleSD = 2.5,
+                  durMortMean = 7,
+                  durMortSD = 2)
 
 # # ### 2019-09-24
 # expDesign <- list(#area = c("ForMont", "Hereford"),
@@ -60,20 +72,28 @@ expDesign <- list(area = c("temperate-2a-3b"),#"temperate-2a-3b","mixedwood-042-
 
 simInfo <- list()
 for (a in names(expDesign$mgmt)) {
-  simInfo[[a]] <- expand.grid(areaName = a,
-                              scenario = expDesign$scenario,
-                              mgmt = expDesign$mgmt[[a]],
-                              cropped = expDesign$cropped[[a]],
-                              spinup = expDesign$spinup,
-                              includeSnags = includeSnags,
-                              fire = expDesign$fire,
-                              BDA = expDesign$BDA,
-                              wind = expDesign$wind,
-                              harvest = expDesign$harvest,
-                              replicate = expDesign$rep)
+  for (i in seq_along(expDesign$ND$wind)) {
+    simInfo[[paste(a, i, sep = "_")]] <- expand.grid(
+      areaName = a,
+      scenario = expDesign$scenario,
+      mgmt = expDesign$mgmt[[a]],
+      cropped = expDesign$cropped[[a]],
+      spinup = expDesign$spinup,
+      includeSnags = includeSnags,
+      wind = expDesign$ND$wind[i],
+      BDA = expDesign$ND$BDA[i],
+      fire = expDesign$ND$fire[i],
+      ND_scenario=expDesign$ND$ND_scenario[i],
+      replicate = seq_len(expDesign$rep)
+    )
+  }
 }
 simInfo <- do.call("rbind", simInfo) %>%
-  arrange(replicate)
+  mutate(harvest = ifelse(mgmt == "noHarvest", F, T)) %>%
+  arrange(replicate, fire, BDA, wind, harvest) %>%
+  select(areaName, scenario, mgmt, cropped, spinup, includeSnags,
+         harvest, wind, BDA, fire, ND_scenario, replicate)
+
 
 sID <- ((1:nrow(simInfo))-1)#+240
 simInfo <- data.frame(simID = str_pad(sID, nchar(max(sID)),
@@ -84,7 +104,7 @@ row.names(simInfo) <- 1:nrow(simInfo)
 
 require(parallel)
 require(doSNOW)
-n <- floor(detectCores() * 0.5)
+n <- floor(detectCores() * 0.25)
 
 # #######
 cl = makeCluster(n, outfile = "") ## 
@@ -104,6 +124,7 @@ foreach(i = 1:nrow(simInfo)) %dopar% {
     wind <- simInfo[i,"wind"]
     BDA <- simInfo[i,"BDA"]
     includeSnags <- simInfo[i,"includeSnags"]
+    dist<- simInfo[i,"dist"]
     
     dir.create(simID)
     
@@ -113,6 +134,7 @@ foreach(i = 1:nrow(simInfo)) %dopar% {
 
     if(cropped) {
       rCrop <- raster(paste0(inputDir, "/studyArea_",
+                             #areaName, ".tif"))
                              areaName, "_cropped.tif"))
       # initial communities
       r <- raster(paste0(inputDir, "/initial-communities_", areaName, ".tif"))
@@ -326,14 +348,79 @@ foreach(i = 1:nrow(simInfo)) %dopar% {
         }
       }
       
-      if(BDA) {
-        ### BDA - Budworm
-        file.copy(paste0(inputDir, "/base-bda.txt"),
-                  paste0(simID),
-                  overwrite = T)
-        file.copy(paste0(inputDir, "/base-BDA_budworm.txt"),
-                  paste0(simID, "/base-BDA_budworm.txt"),
-                  overwrite = T)
+      if (BDA) {
+        # original file, we need to import all other parameters of BDA model to be the same in the new create files
+        original_content <- readLines(file.path(inputDir, "Base-BDA_budworm.txt"))
+        # The base-Bda file well need to be updated each time base on the number created of Base-BDA_budworm
+        base_bda_template <- readLines(file.path(inputDir, "base-bda.txt"))
+        bda_input_files_section_index <- grep("BDAInputFiles", base_bda_template) 
+        
+        
+        # Function to update Start and End year in the BDA content
+        update_years_in_content <- function(content, start_year, duration) {
+          end_year <- start_year + duration
+          content <- sub("StartYear \\d+", paste("StartYear", start_year), content)
+          content <- sub("EndYear \\d+", paste("EndYear", end_year), content)
+          return(content)
+        }
+        
+        
+        
+
+        tsle <- t0 - 2006 ### here we should indicate the year where 'mortality' really started, not only defoliation
+        
+        # Initialize parameters for the BDA file 
+        start_year <- round(rnorm(1,
+                                  mean = bdaParams$cycleMean,
+                                  sd = bdaParams$cycleSD)) - tsle
+        
+        
+        BDAduration <- round(rnorm(1,
+                                mean = bdaParams$durMortMean,
+                                sd = bdaParams$durMortSD))
+
+        current_year <- start_year + BDAduration  # Initialize current_year based on first outbreak
+        j <- 1
+        
+        # List to store generated BDA file names
+        bda_file_names <- character()
+        
+        # Generate BDA files until we reach the end of simulation  
+        while(start_year <= simDuration) {
+         
+          if(j >1) {
+            BDAduration <- round(rnorm(1,
+                                       mean = bdaParams$durMortMean,
+                                       sd = bdaParams$durMortSD))
+          }
+          updated_content <- update_years_in_content(original_content, start_year, BDAduration)
+          new_bda_file_name <- sprintf("Base-BDA_budworm-%d.txt", j)
+          new_bda_file_path <- file.path(simID, new_bda_file_name)
+          writeLines(updated_content, new_bda_file_path)
+          
+          # Append the new BDA file name to the list
+          bda_file_names <- append(bda_file_names, new_bda_file_name)
+          
+          # Prepare for the next iteration
+          start_year <- start_year + round(rnorm(1,
+                                                 mean = bdaParams$cycleMean,
+                                                 sd = bdaParams$cycleSD))
+         
+          
+          # if (start_year > simDuration) {
+          #   break
+          # }
+          
+          j <- j + 1
+        }
+        
+        # Update the base BDA template to include all BDA file names
+        bda_input_files_lines <- paste0(bda_file_names, collapse = "\n\t")
+        base_bda_template[bda_input_files_section_index] <- paste0("BDAInputFiles\t",
+                                                                   bda_input_files_lines)
+        
+        # Save the updated base BDA configuration file
+        writeLines(base_bda_template, file.path(simID, "base-bda.txt"))
       }
      
       
@@ -381,7 +468,7 @@ foreach(i = 1:nrow(simInfo)) %dopar% {
                 quote = F, col.names = F)
     
 }
-stopCluster(cl)
+#stopCluster(cl)
 
 write.csv(simInfo, file = "simInfo.csv", row.names = F,
           fileEncoding = "UTF-8")

@@ -13,7 +13,7 @@ require(dplyr)
 
 initYear <- 2020
 unitConvFact <- 0.01 ### from gC /m2 to tonnes per ha
-simName <- "temperate-2a-3b_cropped"
+simName <- "mixedwood-042-51 - test"
 a <- ifelse(grepl("mixedwood-042-51", simName), "mixedwood-042-51",
             ifelse(grepl("boreal-085-51", simName), "boreal-085-51",
                    ifelse(grepl("temperate-2a-3b", simName), "temperate-2a-3b")))
@@ -32,15 +32,32 @@ require(scales)
 variableLvl <- c("TotalEcosys", "TotalDOM", "ABio", "BBio") ## ordering levels for plotting
 
 
-mgmtLevels <- list("boreal-085-51" = c("generic" = "Generic",
+treatLevels <- list("boreal-085-51" = c("generic" = "Generic",
                                    #"CPI-CP" = "Couvert permanent",
                                    "noHarvest" = "Conservation"),
-                   "mixedwood-042-51" = c("generic" = "Generic",
+                   "mixedwood-042-51" = c("No_ND" = "No natural disturbances",
+                                          "Wind" = "Wind",
+                                          "Wind_Sbw" = "Wind and Spruce Budworm",
+                                          "Wind_Sbw_Fire" = "Wind, Spruce Budworm and wildfires"),
+                     #c("generic" = "Generic",
                                    #"CPI-CP" = "Couvert permanent",
-                                   "noHarvest" = "Conservation"),
+                                   #"noHarvest" = "Conservation"),
                    "temperate-2a-3b" = c("generic" = "Generic",
                                    #"CPI-CP" = "Couvert permanent",
                                    "noHarvest" = "Conservation"))
+
+mgmtLevels <- list("boreal-085-51" = c("generic" = "Generic",
+                                       #"CPI-CP" = "Couvert permanent",
+                                       "noHarvest" = "Conservation"),
+                   "mixedwood-042-51" = c("generic" = "Generic",
+                                          #"CPI-CP" = "Couvert permanent",
+                                          "noHarvest" = "Conservation"),
+                   #c("generic" = "Generic",
+                   #"CPI-CP" = "Couvert permanent",
+                   #"noHarvest" = "Conservation"),
+                   "temperate-2a-3b" = c("generic" = "Generic",
+                                         #"CPI-CP" = "Couvert permanent",
+                                         "noHarvest" = "Conservation"))
 
 mgmtLvls <- c("CPRS", "Couvert permanent", "Conservation")
 
@@ -50,16 +67,17 @@ mgmtLvls <- c("CPRS", "Couvert permanent", "Conservation")
 cols <- list("boreal-085-51" = c("Generic" = "black",
                                     #"Couvert permanent" = "dodgerblue3",
                                     "Conservation" = "goldenrod3"),
-             "mixedwood-042-51" = c("Generic" = "black",
-                                    #"Couvert permanent" = "dodgerblue3",
-                                    "Conservation" = "goldenrod3"),
+             "mixedwood-042-51" = c("No_ND" = "black",
+                                    "Wind" = "lightgreen",#"Couvert permanent" = "dodgerblue3",
+                                    "Wind_Sbw" = "goldenrod3",
+                                    "Wind_Sbw_Fire" = "indianred"),
              "temperate-2a-3b" = c("Generic" = "black",
                                    #"Couvert permanent" = "dodgerblue3",
                                    "Conservation" = "goldenrod3"))
 
-scenRef <-  list("boreal-085-51" = "generic",
-                 "mixedwood-042-51" = "generic",
-                 "temperate-2a-3b" = "generic")
+# scenRef <-  list("boreal-085-51" = "generic",
+#                  "mixedwood-042-51" = "Wind_Sbw_Fire",
+#                  "temperate-2a-3b" = "generic")
 ################################################################################
 ################################################################################
 ################################################################################
@@ -68,11 +86,28 @@ fps <- read.csv(paste0("../outputCompiled/output_BioToFPS_", simName, ".csv"))#r
 AGB <- get(load(paste0("../outputCompiled/output_bio_", simName, ".RData")))
 
 ################################################################################
+### renaming stuff
 outputSummary <- outputSummary %>%
     filter(variable != "mgmtScenarioName") %>%
-    mutate(value = as.numeric(value))
+    mutate(value = as.numeric(value)) %>%
+    mutate(ND_scenarioName  = factor(treatLevels[[a]][match(as.character(ND_scenario), names(treatLevels[[a]]))],
+                                     levels = treatLevels[[a]]),
+           mgmtScenarioName  = factor(mgmtLevels[[a]][match(as.character(mgmtScenarioName), names(mgmtLevels[[a]]))],
+                                    levels = mgmtLevels[[a]]))
+           
 outputSummary <- droplevels(outputSummary)
 
+AGB <- AGB %>%
+  mutate(ND_scenarioName  = factor(treatLevels[[a]][match(as.character(ND_scenario), names(treatLevels[[a]]))],
+                                   levels = treatLevels[[a]]),
+         mgmtScenarioName  = factor(mgmtLevels[[a]][match(as.character(mgmtScenarioName), names(mgmtLevels[[a]]))],
+                                    levels = mgmtLevels[[a]]))
+
+fps <- fps %>%
+  mutate(ND_scenarioName  = factor(treatLevels[[a]][match(as.character(ND_scenario), names(treatLevels[[a]]))],
+                                   levels = treatLevels[[a]]),
+         mgmtScenarioName  = factor(mgmtLevels[[a]][match(as.character(mgmtScenarioName), names(mgmtLevels[[a]]))],
+                                    levels = mgmtLevels[[a]]))
 
 
 
@@ -83,12 +118,9 @@ require(tidyr)
 
 ### pools
 df <- outputSummary %>%
-    mutate(mgmtScenarioName = factor(mgmtLevels[[a]][match(as.character(mgmtScenario), names(mgmtLevels[[a]]))],
-                                 levels = mgmtLevels[[a]])) %>%
-
     filter(Time >=1,variable %in% variableLvl) %>%
-
-    group_by(areaName, scenario, mgmtScenario, mgmtScenarioName,
+    group_by(areaName, scenario, 
+             ND_scenario, ND_scenarioName, mgmtScenario, mgmtScenarioName, 
              ##################
              ##plantedSp,
              
@@ -96,11 +128,13 @@ df <- outputSummary %>%
              Time, variable) %>%
     summarise(value = mean(value),
               mgmtArea_ha = unique(mgmtArea_ha)) %>%
-    group_by(areaName, scenario, mgmtScenario, mgmtScenarioName,
-             ##################
-             #plantedSp,
-             # mgmt,
-             Time, variable) %>%
+  group_by(areaName, scenario, 
+           ND_scenario, ND_scenarioName, mgmtScenario, mgmtScenarioName, 
+           ##################
+           ##plantedSp,
+           
+           # mgmtID,
+           Time, variable) %>%
     summarise(valueTotal = sum(value*mgmtArea_ha),
               mgmtArea_ha = sum(mgmtArea_ha)) %>%
     mutate(value = valueTotal/mgmtArea_ha) %>%
@@ -108,7 +142,8 @@ df <- outputSummary %>%
 
 
 df <- df %>%
-    group_by(areaName, scenario, mgmtScenario, mgmtScenarioName,
+    group_by(areaName, scenario,
+             ND_scenario, ND_scenarioName, mgmtScenario, mgmtScenarioName, 
              ##################
              #plantedSp, mgmt,
              Time) %>%
@@ -122,30 +157,35 @@ df <- df %>%
 
 
 
-x <- df %>%
-    filter(areaName == a,
-           mgmtScenario == scenRef[[a]])
-cNames <- colnames(df)
-cNames <- cNames[-which(cNames %in% c("mgmtScenario", "mgmtScenarioName", "valueTotal", "value", "mgmtArea_ha"))]
+# x <- df %>%
+#     filter(areaName == a,
+#            ND_scenarioName == scenRef[[a]])
+# cNames <- colnames(df)
+# cNames <- cNames[-which(cNames %in% c("treatment", "mgmtScenario", "mgmtName", "ndName", "valueTotal", "value", "mgmtArea_ha"))]
 
-dfRef <- merge(df, x,
-             by = cNames,
-             suffixes = c("",".ref"))
-
-cNames <- c(colnames(df), "value.ref")
-dfRef <- dfRef[,cNames]
-
-ref <- df
+# dfRef <- merge(df, x,
+#              by = cNames,
+#              suffixes = c("",".ref"))
+# 
+# cNames <- c(colnames(df), "value.ref")
+# dfRef <- dfRef[,cNames]
+# 
+# ref <- df
 
   
 p <- ggplot(df, aes(x = initYear+Time, y = value*unitConvFact,
-               colour = mgmtScenarioName)) +
+               colour = ND_scenario, linetype = mgmtScenarioName  )) +
     facet_grid(variable ~ scenario, scale = "free") +
     theme_bw() +
-    scale_color_manual(name = "Management\nscenario",
-                       values = cols[[a]]) +
+  scale_color_manual(name = "Natural disturbance\nscenario",
+                     values = cols[[a]],
+                     labels = treatLevels[[a]]) +
+  scale_linetype_manual(name = "Management\nscenario",
+                        values = c("Generic" = "solid",
+                                   "Conservation" = "dotted")) +
 
-    geom_line(linewidth = 0.5) +
+    geom_line(#linetype = mgmtName,
+              linewidth = 0.5) +
     theme(plot.caption = element_text(size = rel(.5), hjust = 0),
           axis.text.x = element_text(angle = 45, hjust = 1)) +
     labs(title = "Evolution of carbon density",
@@ -188,30 +228,33 @@ df <- outputSummary %>%
            mgmtID >= 10000 |
                mgmtID == 1,
            variable %in% variableLvl) %>%
-    mutate(mgmtScenarioName = factor(mgmtLevels[[a]][match(as.character(mgmtScenario), names(mgmtLevels[[a]]))],
-                                 levels = mgmtLevels[[a]])) %>%
-    ##################
-    group_by(areaName, scenario, mgmtScenario, mgmtScenarioName,
-            
+        ##################
+    group_by(areaName, scenario,
+             ND_scenario, ND_scenarioName, mgmtScenario, mgmtScenarioName, 
              replicate, Time, variable) %>%
     summarize(totalArea = sum(mgmtArea_ha),
               value = weighted.mean(value, mgmtArea_ha)) %>%
     ungroup() %>%
-    group_by(areaName, scenario, mgmtScenario, mgmtScenarioName,
-             Time, variable) %>%
+  group_by(areaName, scenario,
+           ND_scenario, ND_scenarioName, mgmtScenario, mgmtScenarioName, 
+           Time, variable) %>%
     summarise(value = mean(value))
 
 
 p <- ggplot(df, aes(x = initYear+Time, y = value*unitConvFact, #group = simID,
-                   colour = as.factor(mgmtScenarioName))) +
+                    colour = ND_scenario, linetype = mgmtScenarioName)) +
     facet_grid(variable ~ scenario, scale = "free") +#facet_wrap( ~ scenario) +
     theme_bw() +
     geom_hline(yintercept = 0, linetype = 1, color = "grey25", size = 0.35) +
     geom_line() +
     theme(plot.caption = element_text(size = rel(.5), hjust = 0),
           axis.text.x = element_text(angle = 45, hjust = 1)) +
-    scale_color_manual(name = "Management\nscenario",
-                       values = cols[[a]]) +
+    scale_color_manual(name = "Natural disturbance\nscenario",
+                       values = cols[[a]],
+                       labels = treatLevels[[a]]) +
+    scale_linetype_manual(name = "Management\nscenario",
+                          values = c("Generic" = "solid",
+                                     "Conservation" = "dotted")) +
     theme(plot.caption = element_text(size = rel(.5), hjust = 0)) +
     labs(title = paste("Carbon dynamics"),
          subtitle = paste(areaName, simName),
@@ -221,39 +264,40 @@ p <- ggplot(df, aes(x = initYear+Time, y = value*unitConvFact, #group = simID,
 
 
 png(filename= paste0("fluxes_", simName, ".png"),
-    width = 8, height = 8, units = "in", res = 600, pointsize=10)
-print(p)
+    width = 7, height = 8, units = "in", res = 600, pointsize=10)
 
+print(p +  theme(legend.text=element_text(size=rel(.75))))
 dev.off()
 
 ################################################################################
 ################################################################################
 ### to FPS
 df <- fps %>%
-    
-    mutate(mgmtScenarioName = factor(mgmtLevels[[a]][match(as.character(mgmtScenario), names(mgmtLevels[[a]]))],
-                                 levels = mgmtLevels[[a]])) %>%
-
-    group_by(areaName, scenario, mgmtScenario, mgmtScenarioName,  
-             Time, species) %>%
+    group_by(areaName, scenario,
+             ND_scenario, ND_scenarioName, mgmtScenario, mgmtScenarioName,
+             species, Time) %>%
     summarise(BioToFPS_tonnesCTotal = mean(BioToFPS_tonnesCTotal),
               areaManagedTotal_ha = unique(areaManagedTotal_ha),
               areaHarvestedTotal_ha = mean(areaHarvestedTotal_ha))
 
 dfTotal <- df %>%
-    group_by(areaName, scenario, mgmtScenario, mgmtScenarioName,  
-             Time) %>%
+  group_by(areaName, scenario,
+           ND_scenario, ND_scenarioName, mgmtScenario, mgmtScenarioName,
+           Time) %>%
     summarise(BioToFPS_tonnesCTotal = sum(BioToFPS_tonnesCTotal),
               areaManagedTotal_ha = unique(areaManagedTotal_ha),
               areaHarvestedTotal_ha = mean(areaHarvestedTotal_ha))
     
 labdf <- df %>%
-    group_by(areaName, scenario, mgmtScenario, mgmtScenarioName) %>%
+  group_by(areaName, scenario,
+           ND_scenario, ND_scenarioName, mgmtScenario, mgmtScenarioName) %>%
     summarise(areaManagedTotal_ha = unique(areaManagedTotal_ha),
               areaHarvestedTotal_ha = mean(areaHarvestedTotal_ha)) 
 
 yMax <- df %>%
-    group_by(areaName, scenario, mgmtScenario, mgmtScenarioName, Time) %>%
+    group_by(areaName, scenario,
+             ND_scenario, ND_scenarioName, mgmtScenario, mgmtScenarioName,
+             Time) %>%
     summarise(BioToFPS_tonnesCTotal = sum(BioToFPS_tonnesCTotal/areaHarvestedTotal_ha)) %>%
     group_by() %>%
     summarise(yMax = max(BioToFPS_tonnesCTotal))
@@ -265,14 +309,14 @@ colourCount = length(unique(df$species))
 getPalette = colorRampPalette(brewer.pal(8, "Set1"))
 
 ### stacked (per species)
-pWidth <- 4*length(unique(df$mgmtScenario))+2
+pWidth <- 4*length(unique(df$ndName))+2
 png(filename= paste0("fps_spp_", simName, ".png"),
     width = pWidth, height = 6, units = "in", res = 600, pointsize=10)
 
 #ggplot(df, aes(x = 2010+Time, y = BioToFPS_tonnesCTotal/areaHarvestedTotal_ha)) + 
 ggplot(df, aes(x = initYear+Time, y = BioToFPS_tonnesCTotal)) + 
     stat_summary(aes(fill = species), fun.y="sum", geom="area", position = "stack") +
-    facet_grid(scenario ~ mgmtScenarioName ) +
+    facet_grid(scenario ~ ND_scenarioName  ) +
     scale_fill_manual(values = getPalette(colourCount)) +
     scale_y_continuous(labels = label_number(suffix = "kt C", scale = 1e-3)) +
     theme_dark() +
@@ -293,11 +337,12 @@ dev.off()
 ### total
 
 p <- ggplot(dfTotal, aes(x = initYear+Time, y = BioToFPS_tonnesCTotal,
-                         colour = mgmtScenarioName)) +
+                         colour = ND_scenario)) +
     geom_line() +
     facet_wrap( ~ scenario) +
-    scale_color_manual(name = "Management\nscenario",
-                       values = cols[[a]]) +
+    scale_color_manual(name = "Disturbance\nscenario",
+                       values = cols[[a]],
+                       labels = treatLevels[[a]]) +
     scale_y_continuous(labels = label_number(suffix = "kt C", scale = 1e-3)) +
     theme_dark() +
     theme(plot.caption = element_text(size = rel(.5), hjust = 0),
@@ -350,12 +395,15 @@ require(raster)
 
 ##without the age classes
 df <- AGB %>%
-  group_by(areaName, scenario, mgmtScenario, mgmtScenarioName, 
+
+  group_by(areaName, scenario,
+           ND_scenario, ND_scenarioName, mgmtScenario, mgmtScenarioName,
            Time, replicate,
            species) %>%
   summarise(agb_tonnesTotal = sum(agb_tonnesTotal),
                                  areaTotal_ha = sum(unique(landtypeArea_ha))) %>%
-  group_by(areaName, scenario, mgmtScenario, mgmtScenarioName,
+  group_by(areaName, scenario,
+           ND_scenario, ND_scenarioName, mgmtScenario, mgmtScenarioName,
            Time, species) %>%
   summarise(agb_tonnesTotal = mean(agb_tonnesTotal),
             areaTotal_ha = unique(areaTotal_ha)) %>%
@@ -369,13 +417,13 @@ require(RColorBrewer)
 ### stacked (total)
 colourCount = length(unique(df$species))
 getPalette = colorRampPalette(brewer.pal(9, "Set1"))
-pHeight <- 2 * length(unique(df$mgmtScenario))
+pHeight <- 2 * length(unique(df$ND_scenario))
 png(filename= paste0("agb_sppStack_", simName, ".png"),
     width = 8, height = pHeight, units = "in", res = 600, pointsize=10)
 
 ggplot(df, aes(x = 2020 + Time, y = agb_tonnesTotal/areaTotal_ha)) + 
     stat_summary(aes(fill = species), fun.y="sum", geom="area", position = "stack") +
-    facet_grid(mgmtScenarioName ~ scenario) +
+    facet_grid(mgmtScenarioName ~ ND_scenarioName) +
     scale_fill_manual("",
                       values = getPalette(colourCount)) +
     theme_bw() +
@@ -403,7 +451,7 @@ ggplot(df, aes(x = 2020+Time, y = agb_tonnesTotal/areaTotal_ha,
                group = species)) + 
     geom_line() +
     #stat_summary(aes(fill = species), fun.y="sum", geom="area", position = "stack") +
-    facet_grid(mgmtScenarioName ~ scenario) +
+  facet_grid(mgmtScenarioName ~ ND_scenarioName) +
     scale_colour_manual("",
                         values = getPalette(colourCount)) +
     #scale_fill_manual(values = getPalette(colourCount)) +
@@ -431,20 +479,19 @@ dev.off()
 cols = brewer.pal(n = 9, name = 'Greens')[3:9]
 ##########################
 
-df <- AGB %>%
-    mutate(mgmtScenario = factor(mgmtLevels[[a]][match(as.character(mgmtScenario), names(mgmtLevels[[a]]))],
-                                 levels = mgmtLevels[[a]]))
 
 
-df <- df %>% mutate(mgmt =  mgmtScenario) %>% 
-    group_by(areaName, scenario, mgmtScenario,
-             mgmt,
+
+df <- AGB %>% mutate(mgmt =  mgmtScenario) %>% 
+    group_by(areaName, scenario,
+             ND_scenario, ND_scenarioName, mgmtScenario, mgmtScenarioName,
              Time, replicate,
              ageClass,
              species) %>%
     summarise(agb_tonnesTotal = sum(agb_tonnesTotal),
               areaTotal_ha = sum(unique(landtypeArea_ha))) %>%
-    group_by(areaName, scenario, mgmt,
+    group_by(areaName, scenario,
+             ND_scenario, ND_scenarioName, mgmtScenario, mgmtScenarioName,
              ageClass,
              Time, species) %>%
     summarise(agb_tonnesTotal = mean(agb_tonnesTotal),
@@ -452,7 +499,7 @@ df <- df %>% mutate(mgmt =  mgmtScenario) %>%
     as.data.frame()
 
 
-require(RColorBrewer)
+#require(RColorBrewer)
 
 
 ################################################################################
@@ -471,7 +518,7 @@ df[,"ageClass"] <- factor(df$ageClass, levels = acLvls)
     
 p <- ggplot(df, aes(x = 2020+Time, y = agb_tonnesTotal/areaTotal_ha)) + 
     stat_summary(aes(fill = ageClass), fun.y="sum", geom="area", position = "stack") +
-    facet_grid(scenario ~ mgmt, scales = "fixed") +#scales = "free_y") +
+  facet_grid(mgmtScenarioName ~ ND_scenarioName, scales = "fixed") +#scales = "free_y") +
     scale_fill_manual("Age classes",
                       values = cols)+
     theme_bw() +
