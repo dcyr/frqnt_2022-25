@@ -39,13 +39,13 @@ expDesign <- list(area = c("temperate-2a-3b"),#temperate-2a-3b", "boreal-5a", "m
                     "temperate-2a-3b" =  c("generic","noHarvest")), #noHarvest
                   spinup = F,
                   cropped  = list("temperate-2a-3b" = F),
-                  rep = 2,
+                  rep = 5,
                   #ND natural disturbances 
                   ND = data.frame(
-                    wind = c(FALSE, TRUE, TRUE, TRUE),
-                    BDA = c(FALSE, FALSE, TRUE, TRUE),
-                    fire = c(FALSE, FALSE, FALSE, TRUE),
-                    ND_scenario=c("No_ND","Wind","Wind_Sbw","Wind_Sbw_Fire")
+                    wind = c(TRUE, TRUE, TRUE),
+                    BDA = c(FALSE, TRUE, TRUE),
+                    fire = c( FALSE, FALSE, TRUE),
+                    ND_scenario=c("Wind","Wind_Sbw","Wind_Sbw_Fire")
                   )
 )
 
