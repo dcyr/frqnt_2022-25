@@ -16,9 +16,12 @@ require(raster)
 
 gisDir <- "../gis/data"
 areas <- "temperate-2a-3b"
-lNames <- c("studyArea_temperate_2a-3b_Buffered_-77k_Convex.shp",
+lNames <- c("studyArea_temperate_2a-3b_Buffered_-20k_Convex.shp",
             "studyArea_boreal_5a_Buffered_-95k_Convex.shp",
             "studyArea_mixedwood_042-51_Dissolved_Buffered_-52k_Convex.shp")
+
+outputType <- "landtype"
+
 
 a <- areas
 
@@ -31,13 +34,21 @@ for (a in areas) {
   # st_layers(dsn = "D:/SIFORT/TES_Geometrie.gdb")
   p <- read_sf(dsn = paste(gisDir, x, sep = "/"))
   p <- st_transform(p, st_crs(landtypes))
-  
   r <- mask(landtypes, p)
   r <- trim(r)
-  r[!is.na(r)] <- 1
-  plot(r)
+  if(outputType == "studyArea") {
+  r[!is.na(r)] <- 1  
   writeRaster(r, file = paste0("studyArea_", a, "_cropped.tif"),
-                              NAflag = 0, datatype="INT4S", overwrite=TRUE)
+              NAflag = 0, datatype="INT4S", overwrite=TRUE)
+  } 
+  if(outputType == "landtype") {
+    writeRaster(r, file = paste0("landtypes_", a, "_cropped.tif"),
+                NAflag = 0, datatype="INT4S", overwrite=TRUE)
+  }
+  
+
+  plot(r)
+
 }
 
 

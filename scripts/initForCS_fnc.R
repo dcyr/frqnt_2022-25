@@ -8,6 +8,7 @@ initForCS <- function(forCSInput, ### a formatted Forest Carbon Succession input
                       landtypes_AT,
                       climate = F,
                       spinup = F,
+                      domOBS = F,
                       version = "3.1",
                       scenario,
                       t0,
@@ -335,6 +336,13 @@ initForCS <- function(forCSInput, ### a formatted Forest Carbon Succession input
     print("Preparing / updating 'Dompools'")
     tmp <- forCS$DOMPools$table
     tmp[,3] <-  DomFetch(aidbURL = aidbURL)$PropToAtmosphere
+    ### updating with Hararuk values(needed to average out values for poolID 8 and 9, i.e. snags)
+    tmp[1:9,3] <- c(0.789, 0.669, 0.869, 0.817, 0.793,
+                 1, 1, 0.513, 0.659)
+  
+    
+    
+    
     # tmp[which(tmp$V2 == "Slow Aboveground"), 3] <- 0.83
     forCS$DOMPools$table <- tmp
     
@@ -346,16 +354,60 @@ initForCS <- function(forCSInput, ### a formatted Forest Carbon Succession input
     forCS$EcoSppDOMParameters$table <- EcoSppDOMParametersFetch(sppNames = names(spp),
                                                                 landtypeNames = lt)
     
+    ### update CBM decay rates and q10 with Hararuk's
+    decayRatesHararuk <- read.csv("../data/DOM-decayParams.csv") %>%
+      select(spp, poolID, decayRate_Hararuk, q10_Hararuk) %>%
+      mutate(poolID = as.factor(poolID)) %>%
+      group_by(spp, poolID) %>%
+      summarize(decayRateHararuk = unique(decayRate_Hararuk),
+                q10Hararuk = unique(q10_Hararuk))
+    
+    forCS$EcoSppDOMParameters$table <- forCS$EcoSppDOMParameters$table %>%
+      left_join(decayRatesHararuk) %>%
+      mutate(OrganicMatterDecayRate = decayRateHararuk,
+             Q10 = q10Hararuk) %>%
+      select(landtype, spp, poolID, OrganicMatterDecayRate, amountAtT0, Q10)
+    
+    
     # for soil spin-up
-    forCS$EcoSppDOMParameters$table[,5] <- 0
     if(spinup) {
-       
         forCS$EcoSppDOMParameters$table[,5] <- 0
     } else {
+      if(domOBS) {
+        tmp <- read.csv("../inputsLandis/DOM-initPools_obs.csv") ###### integrated in initForCS_fnc.R
+        orgMinPools <- c(VF_A = "organic",
+                         VF_B = "mineral",
+                         Fast_A = "organic",
+                         Fast_B = "mineral",
+                         MED = "organic",
+                         Slow_A = "organic",
+                         Slow_B = "mineral",
+                         Sng_Stem = "organic",
+                         Sng_Oth = "organic",
+                         Extra = NA)
+        #### Assign DOM values based on proportions suggested by ForCS default spinup
+        initDOMprop <- read.csv(paste0("../inputsLandis/DOM-initPools_", a, ".csv"))
+        #initDOMprop[,"pool"] <-  names(domPools)[match(initDOMprop$poolID, domPools)]
+        initDOMprop <- initDOMprop %>%
+          mutate(orgMin = orgMinPools[initDOMprop$poolID]) %>%
+          group_by(landtype, orgMin) %>%
+          mutate(propDOM = prop.table(amountAtT0)) %>%
+          ungroup() %>% 
+          left_join(tmp, by = c("landtype" = "MapCode",
+                                "orgMin" = "orgMin")) %>%
+          mutate(amountAtT0Updated = SOCTotal_tonnesPerHa*propDOM*100)
+        
+        tmp <- initDOMprop %>%
+          mutate(amountAtT0 = round(amountAtT0Updated, 2)) %>%
+          select(landtype, spp, poolID, amountAtT0)
+        
+      } else { ### when using ForCS spinup procedure
         tmp <- read.csv(paste0(inputPathLandis, "/DOM-initPools_", a, ".csv"))
         tmp <- tmp %>%
-            mutate(poolID = as.factor(poolID),
-                   landtype = as.factor(landtype))
+          mutate(poolID = as.factor(poolID),
+                 landtype = as.factor(landtype))
+      }
+       
         # merging in new data
         tmp  <- forCS$EcoSppDOMParameters$table %>%
             merge(tmp, by = c("landtype", "spp", "poolID"),
@@ -375,8 +427,13 @@ initForCS <- function(forCSInput, ### a formatted Forest Carbon Succession input
     ### ForCSProportions
     print("Preparing / updating 'ForCSProportions'")
     forCS$ForCSProportions$table <- ForCSProprotionsFetch(landtypes, landtypes_AT,
-                                                          aidbURL = aidbURL)
-    forCS$ForCSProportions$table[,1:2] <- 0.5  ### I couldn't find those values in AIDB
+                                                      aidbURL = aidbURL)
+    ### replacing values with those from Hararuk
+    forCS$ForCSProportions$table[,1] <- 0.663 #BiomassFine (from Hararuk, Prop of dead fine roots that goes into AGVF, the rest going into BGVF; Hararuk: 0.663; CBM : 0.5)
+    forCS$ForCSProportions$table[,2] <- 0.523 #BiomassCoarse (from Prop of dead coarse roots that goes into AGF, the rest going into BGF; Hararuk: 0.523, CBM : 0.5)
+    forCS$ForCSProportions$table[,3] <- 0.004 #SlowAGtoSlowBG aka SlowMixingRate (Hararuk: 0.004, CBM = 0.006)
+    forCS$ForCSProportions$table[,4] <- 0.066 #SoftwoodStemSnagToDOM  (Hararuk: 0.066, CBM = 0.03)
+    forCS$ForCSProportions$table[,5] <- 0.081 #SoftwoodBranchSnagToDOM (Hararuk: 0.081, CBM = 0.1)
     ### so they are hard coded at this moment.
     print("Done!")
     
@@ -619,6 +676,10 @@ initForCS <- function(forCSInput, ### a formatted Forest Carbon Succession input
     forCS$RootDynamics$table <- rootBiomassParamsFetch(spp, landtypes_AT,
                                                        aidbURL = aidbURL,
                                                        breaks)
+    ## updating some parameters using Hararuk
+    forCS$RootDynamics$table[,"FRturnover"] <- 0.864 ### Hararuk: 0.864, CBM: 0.641
+    forCS$RootDynamics$table[,"CRturnover"] <- 0.019 ### Hararuk: 0.019, CBM: 0.020
+    
     print("Done!")
     
 

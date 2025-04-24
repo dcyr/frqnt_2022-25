@@ -17,7 +17,7 @@ rm(wwd)
 require(raster)
 inputDir <- "../inputsLandis/"
 
-a <- "mixedwood-042-51"
+a <- "temperate-2a-3b"
 x <- list.files(inputDir)
 
 
@@ -25,7 +25,7 @@ x <- list.files(inputDir)
 rasterA <- x[grepl(".tif", x)]
 rasterA <- rasterA[grepl(a, rasterA)]
 
-rCropped <- raster(paste0("../inputsLandis/landtypes_mixedwood-042-51.tif"))
+rCropped <- raster(paste0("../inputsLandis/landtypes_", a, ".tif"))
 rasterA <- rasterA[!grepl("studyArea|cropped|landtypes", rasterA)]
 
 

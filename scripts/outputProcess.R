@@ -23,8 +23,8 @@ require(foreach)
 
 
 ### fetching outputs
-a <- "mixedwood-042-51" #
-simDir <- paste0("D:/forCS - mixedwood-042-51 - test//")#"
+a <- "temperate-2a-3b" #
+simDir <- paste0("D:/forCS - temperate-2a-3b - 2025-04-20/")#"
 studyArea <- raster(paste0("../inputsLandis/studyArea_", a, ".tif"))
 
 
@@ -61,7 +61,7 @@ if("summary" %in% logs) {
 }
 
 require(stringr)
-clusterN <- 8
+clusterN <- 1
 #######
 cl = makeCluster(clusterN, outfile = "") ##
 registerDoSNOW(cl)

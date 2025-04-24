@@ -45,11 +45,12 @@ source(paste(scriptPath, "initSnags_fnc.R", sep = "/"), encoding = "Windows-1252
 landisInputs <- list.files(inputPathLandis)
 ### experiment specifics
 scenario <- c("baseline", "RCP45", "RCP85")#, c("baseline", "RCP45", "RCP85")
-area <-c("temperate-2a-3b", "mixedwood-042-51", "boreal-085-51") #"temperate-2a-3b" #"mixedwood-042-51"#,#c( "temperate-2a-3b","mixedwood-042-51", "boreal-085-51")#,"mixedwood-042-51", "boreal-085-51")#, "temperate-2a-3b", "boreal-085-51")##, "boreal-085-51") "boreal-085-51"  #c("mixedwood-042-51", "temperate-2a-3b", "boreal-085-51")
+area <-c("temperate-2a-3b", "mixedwood-042-51")#, "mixedwood-042-51", "boreal-085-51") #"temperate-2a-3b" #"mixedwood-042-51"#,#c( "temperate-2a-3b","mixedwood-042-51", "boreal-085-51")#,"mixedwood-042-51", "boreal-085-51")#, "temperate-2a-3b", "boreal-085-51")##, "boreal-085-51") "boreal-085-51"  #c("mixedwood-042-51", "temperate-2a-3b", "boreal-085-51")
 t0 <- 2020
 inputOffset <- 0 
 version <- "3.1"
 spinup <- F
+domOBS <- T ### init DOM pools based on observations (only when using VEG_POT as landtypes at this point)
 climate <- T
 allometry <- T
 interpolate <- T
@@ -100,6 +101,7 @@ for(a in area) {
         out <- initForCS(forCSInput, bsMainInput, bsDynInput, landtypes, landtypes_AT,
                   version = version,
                   spinup = spinup,
+                  domOBS = domOBS,
                   climate = climate,
                   allometry = allometry,
                   t0 = t0,

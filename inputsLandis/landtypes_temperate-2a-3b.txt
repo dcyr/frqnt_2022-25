@@ -1,110 +1,111 @@
 LandisData Ecoregions
 
-no     0     none     "non active cells"
-yes	305	305	"No description"
-yes	307	307	"No description"
-yes	308	308	"No description"
-yes	309	309	"No description"
-yes	310	310	"No description"
-yes	311	311	"No description"
-yes	314	314	"No description"
-yes	315	315	"No description"
-yes	316	316	"No description"
-yes	317	317	"No description"
-yes	319	319	"No description"
-yes	320	320	"No description"
-yes	323	323	"No description"
-yes	328	328	"No description"
-yes	339	339	"No description"
-yes	346	346	"No description"
-yes	359	359	"No description"
-yes	360	360	"No description"
-yes	365	365	"No description"
-yes	367	367	"No description"
-yes	368	368	"No description"
-yes	369	369	"No description"
-yes	370	370	"No description"
-yes	371	371	"No description"
-yes	372	372	"No description"
-yes	373	373	"No description"
-yes	375	375	"No description"
-yes	376	376	"No description"
-yes	380	380	"No description"
-yes	385	385	"No description"
-yes	386	386	"No description"
-yes	387	387	"No description"
-yes	388	388	"No description"
-yes	389	389	"No description"
-yes	390	390	"No description"
-yes	391	391	"No description"
-yes	393	393	"No description"
-yes	394	394	"No description"
-yes	397	397	"No description"
-yes	400	400	"No description"
-yes	414	414	"No description"
-yes	415	415	"No description"
-yes	416	416	"No description"
-yes	421	421	"No description"
-yes	425	425	"No description"
-yes	428	428	"No description"
-yes	432	432	"No description"
-yes	433	433	"No description"
-yes	434	434	"No description"
-yes	435	435	"No description"
-yes	436	436	"No description"
-yes	437	437	"No description"
-yes	438	438	"No description"
-yes	439	439	"No description"
-yes	440	440	"No description"
-yes	441	441	"No description"
-yes	443	443	"No description"
-yes	444	444	"No description"
-yes	445	445	"No description"
-yes	446	446	"No description"
-yes	448	448	"No description"
-yes	449	449	"No description"
-yes	450	450	"No description"
-yes	451	451	"No description"
-yes	453	453	"No description"
-yes	462	462	"No description"
-yes	464	464	"No description"
-yes	465	465	"No description"
-yes	468	468	"No description"
-yes	469	469	"No description"
-yes	470	470	"No description"
-yes	471	471	"No description"
-yes	472	472	"No description"
-yes	473	473	"No description"
-yes	474	474	"No description"
-yes	475	475	"No description"
-yes	476	476	"No description"
-yes	477	477	"No description"
-yes	478	478	"No description"
-yes	479	479	"No description"
-yes	480	480	"No description"
-yes	481	481	"No description"
-yes	482	482	"No description"
-yes	483	483	"No description"
-yes	484	484	"No description"
-yes	485	485	"No description"
-yes	487	487	"No description"
-yes	488	488	"No description"
-yes	491	491	"No description"
-yes	493	493	"No description"
-yes	496	496	"No description"
-yes	497	497	"No description"
-yes	498	498	"No description"
-yes	499	499	"No description"
-yes	500	500	"No description"
-yes	501	501	"No description"
-yes	502	502	"No description"
-yes	503	503	"No description"
-yes	504	504	"No description"
-yes	505	505	"No description"
-yes	506	506	"No description"
-yes	507	507	"No description"
-yes	508	508	"No description"
-yes	509	509	"No description"
-yes	513	513	"No description"
-yes	522	522	"No description"
-yes	528	528	"No description"
+>> active MapCode Name Description
+no 0 none "non active cells"
+yes 305 305 RE2_4b
+yes 307 307 RS2_4b
+yes 308 308 MJ2_4b
+yes 309 309 MS2_4b
+yes 310 310 RE3_4b
+yes 311 311 RS1_4b
+yes 314 314 MS2_4c
+yes 315 315 RS2_4c
+yes 316 316 MJ1_4b
+yes 317 317 MA1_4b
+yes 319 319 RP1_4b
+yes 320 320 RE3_4c
+yes 323 323 RC3_4b
+yes 328 328 MJ2_4c
+yes 339 339 MJ1_4c
+yes 346 346 FE3_4b
+yes 359 359 FE3_4c
+yes 360 360 MF1_4b
+yes 365 365 MJ2_3a
+yes 367 367 RS2_3a
+yes 368 368 MJ1_3a
+yes 369 369 FE3_3a
+yes 370 370 MF1_3a
+yes 371 371 RC3_3a
+yes 372 372 RE3_3a
+yes 373 373 RS1_3a
+yes 375 375 MS2_3a
+yes 376 376 RP1_3a
+yes 380 380 RE2_3a
+yes 385 385 MJ2_3c
+yes 386 386 MJ1_3c
+yes 387 387 MS2_3c
+yes 388 388 RS2_3c
+yes 389 389 MF1_3c
+yes 390 390 FE3_3c
+yes 391 391 RS1_3c
+yes 393 393 RP1_3c
+yes 394 394 RE3_3c
+yes 397 397 RB1_3c
+yes 400 400 FE6_3c
+yes 414 414 FE6_3a
+yes 415 415 FE6_4b
+yes 416 416 NDI_4b
+yes 421 421 FE2_3c
+yes 425 425 RC3_3c
+yes 428 428 FC1_3a
+yes 432 432 MJ1_3b
+yes 433 433 MJ2_3b
+yes 434 434 FE3_3b
+yes 435 435 RS2_3b
+yes 436 436 RC3_3b
+yes 437 437 RS1_3b
+yes 438 438 FE6_3b
+yes 439 439 MS2_3b
+yes 440 440 MF1_3b
+yes 441 441 NDI_3b
+yes 443 443 MA1_3b
+yes 444 444 RE3_3b
+yes 445 445 RB1_3b
+yes 446 446 FE5_3b
+yes 448 448 RP1_3b
+yes 449 449 FE2_3b
+yes 450 450 RB1_4b
+yes 451 451 FO1_3b
+yes 453 453 RE2_3b
+yes 462 462 FC1_3b
+yes 464 464 FE5_3a
+yes 465 465 FE2_3a
+yes 468 468 MF1_2a
+yes 469 469 MJ2_2a
+yes 470 470 MA1_3c
+yes 471 471 MJ1_2a
+yes 472 472 RB1_2a
+yes 473 473 RS2_2a
+yes 474 474 RC3_2a
+yes 475 475 RE3_2a
+yes 476 476 FO1_3c
+yes 477 477 FE2_2a
+yes 478 478 RS1_2a
+yes 479 479 RP1_2a
+yes 480 480 FE6_2a
+yes 481 481 FO1_2a
+yes 482 482 NDI_3c
+yes 483 483 FO1_3a
+yes 484 484 FC1_2a
+yes 485 485 FE5_2a
+yes 487 487 FE3_2a
+yes 488 488 FC1_3c
+yes 491 491 FE5_3c
+yes 493 493 RB1_3a
+yes 496 496 FE1_1a
+yes 497 497 MJ1_1a
+yes 498 498 FE6_1a
+yes 499 499 RP1_1a
+yes 500 500 MF1_1a
+yes 501 501 RS1_1a
+yes 502 502 FE5_1a
+yes 503 503 FC1_1a
+yes 504 504 FE1_3a
+yes 505 505 RB1_1a
+yes 506 506 FE2_1a
+yes 507 507 RC3_1a
+yes 508 508 RE3_1a
+yes 509 509 FO1_1a
+yes 513 513 MJ2_1a
+yes 522 522 FE1_2a
+yes 528 528 MA1_2a

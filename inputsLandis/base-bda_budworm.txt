@@ -1,45 +1,45 @@
 LandisData "BDA Agent"
 
-BDAAgentName	budworm
-BDPCalibrator	1
-SRDMode			mean
-StartYear		10
-EndYear			17
+BDAAgentName budworm
+BDPCalibrator 1
+SRDMode mean
+StartYear 1
+EndYear 7
 
 >>----------------------------------
 >> BDA DISTURBANE REGIME PARAMETERS
 >>----------------------------------
 
-
 >>-------- Regional Outbreak Inputs -------------
-OutbreakPattern 		CyclicUniform <<CyclicNormal or CyclicUniform
-MaxInterval 			0
-MinInterval 			0
-TimeSinceLastEpidemic 	0
-TemporalType 			variablepulse
-MinROS 		0
-MaxROS 		3
+OutbreakPattern CyclicUniform <<CyclicNormal or CyclicUniform
+MaxInterval		0
+MinInterval		0
+TimeSinceLastEpidemic	0
+TemporalType		variablepulse
+MinROS	0
+MaxROS	3
+
 
 >>-------- Dispersal Inputs ----------------------
-Dispersal 		no	<<yes or no
-DispersalRate 	50000	<<meters/year
-EpidemicThresh 			0.5
-InitialEpicenterNum 	0
-OutbreakEpicenterCoeff 	0.01
-OutbreakEpicenterThresh 0
-SeedEpicenter 			yes
->>SeedEpicenterMax 		5 << new params?
-SeedEpicenterCoeff 		0.25
-DispersalTemplate 		MaxRadius  <<MaxRadius, 4N,
-									<<8N, 12N, or 24N
+
+Dispersal		no		<<yes or no
+DispersalRate		50000		<<meters/year
+EpidemicThresh		0.5
+InitialEpicenterNum	5
+OutbreakEpicenterCoeff	0.01
+OutbreakEpicenterThresh 0.0
+SeedEpicenter		yes		<<yes or no
+SeedEpicenterCoeff	10
+DispersalTemplate	MaxRadius	<<MaxRadius, 4N,
+					<<8N, 12N, or 24N
+
 
 >>-------- Neighborhood Resource Inputs -----------
-NeighborFlag 		yes				<<yes or no
-NeighborSpeedUp 	none			<<none, 2x, 3x, or 4x	
-NeighborRadius 		1000			<<meters
-NeighborShape 		uniform			<<uniform, linear, or gaussian
+NeighborFlag 		yes 		<<yes or no
+NeighborSpeedUp 	none		<<none, 2x, 3x, or 4x	
+NeighborRadius 		1000 		<<meters
+NeighborShape 		uniform 	<<uniform, linear, or gaussian
 NeighborWeight 		0.01
-
 
 >> Intensity Class Thresholds
 IntensityClass2_BDP 0.33
@@ -50,12 +50,8 @@ IntensityClass3_BDP 0.67
 >> DisturbanceModifiers
 >> >>SRD Modifer	Duration	Type
 
-
->>-------------------------
->> BDA SEVERITY PARAMETERS
->>--------------------------
 BDASpeciesParameters
 >> SpeciesName     Age1 SRDProb1  Age2 SRDProb2  Age3 SRDProb3  Age1 VulnProb1  Age2 VulnProb2  Age3 VulnProb3  fuel
-ABIE.BAL 0 0.25 50 0.5 80 0.7 0 0 50 0.2 80 0.3 yes
-PICE.GLA 0 0.18 50 0.3 80 0.5 0 0 50 0.08 80 0.2 yes
-PICE.MAR 0 0.07 50 0.14 80 0.3 0 0.05 50 0.1 999 0.2 yes
+ABIE.BAL 	0 0.25	30 0.5 	50 1		0 0.2	30 0.42	50 0.85 	yes
+PICE.GLA 	0 0.18	30 0.36	50 0.5		0 0.1	0 0.15	50 0.3 	yes
+PICE.MAR 	0 0.07	30 0.14	50 0.28		0 0.13	30 0.2	999 1 	yes

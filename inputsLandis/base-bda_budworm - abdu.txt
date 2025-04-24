@@ -1,0 +1,57 @@
+LandisData "BDA Agent"
+
+BDAAgentName budworm
+BDPCalibrator 1
+SRDMode mean
+StartYear 1
+EndYear 7
+
+>>----------------------------------
+>> BDA DISTURBANE REGIME PARAMETERS
+>>----------------------------------
+
+>>-------- Regional Outbreak Inputs -------------
+OutbreakPattern CyclicUniform <<CyclicNormal or CyclicUniform
+MaxInterval		0
+MinInterval		0
+TimeSinceLastEpidemic	0
+TemporalType		variablepulse
+MinROS	0
+MaxROS	3
+
+
+>>-------- Dispersal Inputs ----------------------
+Dispersal 	yes <<yes or no
+DispersalRate 	20000
+EpidemicThresh 	0.5
+InitialEpicenterNum	1
+OutbreakEpicenterCoeff	0.01
+OutbreakEpicenterThresh 1
+SeedEpicenter		yes
+>>SeedEpicenterMax	3
+SeedEpicenterCoeff	0.1
+DispersalTemplate	MaxRadius 	<<MaxRadius, 4N,
+					<<8N, 12N, or 24N
+
+
+>>-------- Neighborhood Resource Inputs -----------
+NeighborFlag 		yes 		<<yes or no
+NeighborSpeedUp 	none		<<none, 2x, 3x, or 4x	
+NeighborRadius 		1000 		<<meters
+NeighborShape 		uniform 	<<uniform, linear, or gaussian
+NeighborWeight 		0.01
+
+>> Intensity Class Thresholds
+IntensityClass2_BDP 0.33
+IntensityClass3_BDP 0.67
+
+>>Ecoregion Modifiers
+
+>> DisturbanceModifiers
+>> >>SRD Modifer	Duration	Type
+
+BDASpeciesParameters
+>> SpeciesName     Age1 SRDProb1  Age2 SRDProb2  Age3 SRDProb3  Age1 VulnProb1  Age2 VulnProb2  Age3 VulnProb3  fuel
+ABIE.BAL 	0 0.25	30 0.5 	50 1		0 0.2	30 0.42	50 0.85 	yes
+PICE.GLA 	0 0.18	30 0.36	50 0.5		0 0.1	0 0.15	50 0.3 	yes
+PICE.MAR 	0 0.07	30 0.14	50 0.28		0 0.13	30 0.2	999 1 	yes

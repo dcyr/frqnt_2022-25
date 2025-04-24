@@ -13,7 +13,7 @@ require(dplyr)
 
 initYear <- 2020
 unitConvFact <- 0.01 ### from gC /m2 to tonnes per ha
-simName <- "mixedwood-042-51 - test"
+simName <- "mixedwood-042-51 - 2025-04-13"
 a <- ifelse(grepl("mixedwood-042-51", simName), "mixedwood-042-51",
             ifelse(grepl("boreal-085-51", simName), "boreal-085-51",
                    ifelse(grepl("temperate-2a-3b", simName), "temperate-2a-3b")))
@@ -42,9 +42,10 @@ treatLevels <- list("boreal-085-51" = c("generic" = "Generic",
                      #c("generic" = "Generic",
                                    #"CPI-CP" = "Couvert permanent",
                                    #"noHarvest" = "Conservation"),
-                   "temperate-2a-3b" = c("generic" = "Generic",
-                                   #"CPI-CP" = "Couvert permanent",
-                                   "noHarvest" = "Conservation"))
+                   "temperate-2a-3b" = c("No_ND" = "No natural disturbances",
+                                         "Wind" = "Wind",
+                                         "Wind_Sbw" = "Wind and Spruce Budworm",
+                                         "Wind_Sbw_Fire" = "Wind, Spruce Budworm and wildfires"))
 
 mgmtLevels <- list("boreal-085-51" = c("generic" = "Generic",
                                        #"CPI-CP" = "Couvert permanent",
@@ -71,9 +72,10 @@ cols <- list("boreal-085-51" = c("Generic" = "black",
                                     "Wind" = "lightgreen",#"Couvert permanent" = "dodgerblue3",
                                     "Wind_Sbw" = "goldenrod3",
                                     "Wind_Sbw_Fire" = "indianred"),
-             "temperate-2a-3b" = c("Generic" = "black",
-                                   #"Couvert permanent" = "dodgerblue3",
-                                   "Conservation" = "goldenrod3"))
+             "temperate-2a-3b" = c("No_ND" = "black",
+                                   "Wind" = "lightgreen",#"Couvert permanent" = "dodgerblue3",
+                                   "Wind_Sbw" = "goldenrod3",
+                                   "Wind_Sbw_Fire" = "indianred"))
 
 # scenRef <-  list("boreal-085-51" = "generic",
 #                  "mixedwood-042-51" = "Wind_Sbw_Fire",
@@ -309,7 +311,7 @@ colourCount = length(unique(df$species))
 getPalette = colorRampPalette(brewer.pal(8, "Set1"))
 
 ### stacked (per species)
-pWidth <- 4*length(unique(df$ndName))+2
+pWidth <- 4*length(unique(df$ND_scenarioName))+2
 png(filename= paste0("fps_spp_", simName, ".png"),
     width = pWidth, height = 6, units = "in", res = 600, pointsize=10)
 
@@ -362,8 +364,30 @@ print(p)
 dev.off()
 
 
+### area harvested
+p <- ggplot(dfTotal, aes(x = initYear+Time, y = areaHarvestedTotal_ha,
+                    colour = ND_scenario)) +
+  geom_line() +
+  facet_wrap( ~ scenario) +
+  scale_color_manual(name = "Disturbance\nscenario",
+                     values = cols[[a]],
+                     labels = treatLevels[[a]]) +
+  scale_y_continuous(labels = label_number(suffix = "kt C", scale = 1e-3)) +
+  theme_dark() +
+  theme(plot.caption = element_text(size = rel(.5), hjust = 0),
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  #lims(y = c(0,20000)) +
+  labs(title = "Total area harvested",
+       subtitle = paste(areaName, simName),
+       x = "",
+       y = expression(paste("Area (ha)",))) 
 
 
+png(filename= paste0("harvest_areaHarvested_", simName, ".png"),
+    width = 8, height = 4, units = "in", res = 600, pointsize=10)
+print(p)
+
+dev.off()
 ################################################################################
 ################################################################################
 ################################################################################
