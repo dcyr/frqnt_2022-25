@@ -66,7 +66,7 @@ initForCS <- function(forCSInput, ### a formatted Forest Carbon Succession input
     if(includeSnags) {
 
       forCS$SnagFile <-  "init-snags.txt"
-      snags <- read.csv(paste0(inputPathLandis, "/snags_", a,".csv"))
+      snags <- read.csv(paste0(inputPathLandis, "/initial-snags_", a,".csv"))
       snags[,"TimeSinceDeath"] <- t0-snags$YearOfDeath
       snags<- snags[, c("species", "AgeAtDeath", "TimeSinceDeath", "Cause")]
       if(as.numeric(version) >= 3.1) {

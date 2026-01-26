@@ -1,0 +1,21 @@
+LandisData "ForC Succession"
+SnagData
+>>	species	AgeAtDeath	TimeSinceDeath	Cause
+BETU.ALL	29	9	other
+BETU.ALL	30	27	other
+BETU.ALL	31	45	other
+BETU.ALL	89	9	other
+BETU.ALL	90	27	other
+BETU.ALL	91	45	other
+BETU.ALL	149	9	other
+BETU.ALL	150	27	other
+BETU.ALL	151	45	other
+PICE.MAR	29	9	other
+PICE.MAR	30	27	other
+PICE.MAR	31	45	other
+PICE.MAR	89	9	other
+PICE.MAR	90	27	other
+PICE.MAR	91	45	other
+PICE.MAR	149	9	other
+PICE.MAR	150	27	other
+PICE.MAR	151	45	other

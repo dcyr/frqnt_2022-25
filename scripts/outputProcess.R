@@ -23,8 +23,8 @@ require(foreach)
 
 
 ### fetching outputs
-a <- "temperate-2a-3b" #
-simDir <- paste0("D:/forCS - temperate-2a-3b - 2025-04-20/")#"
+a <- "mixedwood-042-51" #
+simDir <- paste0("D:/forCS - mixedwood-042-51 - 2026-01-21/")#"
 studyArea <- raster(paste0("../inputsLandis/studyArea_", a, ".tif"))
 
 

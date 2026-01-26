@@ -5,10 +5,14 @@ rm(list = ls())
 home <- path.expand("~")
 home <- gsub("\\\\", "/", home)
 home <- gsub("/Documents", "", home) # necessary on my Windows machine
-setwd(paste(home, "Sync/Travail/ECCC/Landis-II/frqnt_2022-25/", sep = "/"))
+wwd <- ifelse(Sys.info()["sysname"] == "Linux", paste(home, "Sync/Travail/ECCC/Landis-II/Montmorency_calib/", sep = "/"),
+                ifelse(Sys.info()["user"] == "CyrDo", paste(home, "Documents/Sync/Travail/ECCC/Landis-II/frqnt_2022-25", sep = "/"),
+                       "C:/Users/dcyr-z840/Sync/Travail/ECCC/Landis-II/frqnt_2022-25"))
+setwd(wwd)
 wwd <- paste(getwd(), Sys.Date(), sep = "/")
 dir.create(wwd)
 setwd(wwd)
+
 require(dplyr)
 
 initYear <- 2020
@@ -21,6 +25,13 @@ a <- ifelse(grepl("mixedwood-042-51", simName), "mixedwood-042-51",
 areaName <- a
 # areaName <- ifelse(a == "ForMont", "For?t Montmorency",
 #                    ifelse(a == "Hereford", "For?t Hereford", a))
+
+carbonTbl <- list("mixedwood-042-51" = c(AAC = 1166700, #cubic meters
+                                         area = 636270, # ha
+                                         Cdensity = .214), #tonnes of C per cubic meters,
+                  "temperate-2a-3b" = c(AAC = NA, #cubic meters
+                                        area = NA, # ha
+                                        Cdensity = NA)) #tonnes of C per cubic meters
 
 require(ggplot2)
 require(dplyr)
@@ -76,6 +87,38 @@ cols <- list("boreal-085-51" = c("Generic" = "black",
                                    "Wind" = "lightgreen",#"Couvert permanent" = "dodgerblue3",
                                    "Wind_Sbw" = "goldenrod3",
                                    "Wind_Sbw_Fire" = "indianred"))
+
+spp <- read.table(paste0("../inputsLandis/species_", a, ".txt"),
+                      skip = 1, comment.char = ">")
+
+spGr <- c("ABIE.BAL" = "Fir/Spruce/Pine/Larch",
+          "ACER.RUB" = "tolerant hardwoods",
+          "ACER.SAH" = "tolerant hardwoods",
+          "BETU.ALL" = "tolerant hardwoods",
+          "BETU.PAP" = "intolerant hardwoods",
+          "FAGU.GRA" = "tolerant hardwoods",
+          "LARI.LAR" = "Fir/Spruce/Pine/Larch",
+          "PICE.GLA" = "Fir/Spruce/Pine/Larch",
+          "PICE.MAR" = "Fir/Spruce/Pine/Larch",
+          "PICE.RUB" = "Fir/Spruce/Pine/Larch",
+          "PINU.BAN" = "Fir/Spruce/Pine/Larch",
+          "PINU.RES" = "Red and White Pines",
+          "PINU.STR" = "Red and White Pines",
+          "POPU.TRE" = "intolerant hardwoods",
+          "QUER.RUB" = "tolerant hardwoods",
+          "THUJ.SPP.ALL" = "Thuja",
+          "TSUG.CAN" = "Tsuga")
+
+spGrCol <- c("Fir/Spruce/Pine/Larch" = "darkolivegreen",
+             "intolerant hardwoods" = "lemonchiffon3",
+             "tolerant hardwoods" = "green3",
+             "Red and White Pines" = "coral4",
+             "Thuja" = "orange3",
+             "Tsuga" = "coral1")
+spGr <- factor(spGr, levels = names(spGrCol))
+
+
+
 
 # scenRef <-  list("boreal-085-51" = "generic",
 #                  "mixedwood-042-51" = "Wind_Sbw_Fire",
@@ -278,9 +321,18 @@ df <- fps %>%
     group_by(areaName, scenario,
              ND_scenario, ND_scenarioName, mgmtScenario, mgmtScenarioName,
              species, Time) %>%
-    summarise(BioToFPS_tonnesCTotal = mean(BioToFPS_tonnesCTotal),
+   summarise(BioToFPS_tonnesCTotal = mean(BioToFPS_tonnesCTotal),
               areaManagedTotal_ha = unique(areaManagedTotal_ha),
-              areaHarvestedTotal_ha = mean(areaHarvestedTotal_ha))
+              areaHarvestedTotal_ha = mean(areaHarvestedTotal_ha)) %>%
+    mutate(spGr = spGr[species]) %>%
+    group_by(areaName, scenario,
+           ND_scenario, ND_scenarioName, mgmtScenario, mgmtScenarioName,
+           spGr, Time) %>%
+  summarise(BioToFPS_tonnesCTotal = sum(BioToFPS_tonnesCTotal),
+            areaManagedTotal_ha = unique(areaManagedTotal_ha),
+            areaHarvestedTotal_ha = unique(areaHarvestedTotal_ha))
+  
+
 
 dfTotal <- df %>%
   group_by(areaName, scenario,
@@ -293,8 +345,9 @@ dfTotal <- df %>%
 labdf <- df %>%
   group_by(areaName, scenario,
            ND_scenario, ND_scenarioName, mgmtScenario, mgmtScenarioName) %>%
-    summarise(areaManagedTotal_ha = unique(areaManagedTotal_ha),
-              areaHarvestedTotal_ha = mean(areaHarvestedTotal_ha)) 
+  summarise(areaManagedTotal_ha = unique(areaManagedTotal_ha),
+              areaHarvestedTotal_ha = mean(areaHarvestedTotal_ha)) %>%
+  mutate(cEquivAAC = areaManagedTotal_ha/carbonTbl[[a]]["area"]*carbonTbl[[a]]["AAC"]*carbonTbl[[a]]["Cdensity"])
 
 yMax <- df %>%
     group_by(areaName, scenario,
@@ -307,7 +360,7 @@ yMax <- as.numeric(yMax)
 
 
 require(RColorBrewer)
-colourCount = length(unique(df$species))
+colourCount = length(unique(df$spGr))
 getPalette = colorRampPalette(brewer.pal(8, "Set1"))
 
 ### stacked (per species)
@@ -317,9 +370,10 @@ png(filename= paste0("fps_spp_", simName, ".png"),
 
 #ggplot(df, aes(x = 2010+Time, y = BioToFPS_tonnesCTotal/areaHarvestedTotal_ha)) + 
 ggplot(df, aes(x = initYear+Time, y = BioToFPS_tonnesCTotal)) + 
-    stat_summary(aes(fill = species), fun.y="sum", geom="area", position = "stack") +
+    stat_summary(aes(fill = spGr), fun.y="sum", geom="area", position = "stack") +
     facet_grid(scenario ~ ND_scenarioName  ) +
-    scale_fill_manual(values = getPalette(colourCount)) +
+    scale_fill_manual(values = spGrCol, name = NULL) +
+    #scale_fill_manual(values = getPalette(colourCount)) +
     scale_y_continuous(labels = label_number(suffix = "kt C", scale = 1e-3)) +
     theme_dark() +
     theme(plot.caption = element_text(size = rel(.5), hjust = 0),
@@ -327,13 +381,14 @@ ggplot(df, aes(x = initYear+Time, y = BioToFPS_tonnesCTotal)) +
     labs(title = "Transfers to harvested wood products",
          subtitle = paste(areaName, simName),
          x = "",
-         y = expression(paste("harvested wood",))) +
+         y = expression(paste("Transfers to HWP",))) +
     geom_text(data = labdf, aes(label = paste("Managed area:", areaManagedTotal_ha, "ha"),
                                 y = yMax, x = initYear),
-              hjust = 0, vjust = 1, size = 2)
+              hjust = 0, vjust = 1, size = 2) +
+  geom_hline(yintercept = labdf$cEquivAAC,
+              linewidth = 1, linetype = "dotted")
     
 dev.off()
-
 
 
 ### total
@@ -353,7 +408,9 @@ p <- ggplot(dfTotal, aes(x = initYear+Time, y = BioToFPS_tonnesCTotal,
     labs(title = "Transfers to harvested wood products",
          subtitle = paste(areaName, simName),
          x = "",
-         y = expression(paste("harvested wood",))) 
+         y = expression(paste("Transfers to HWP",))) +
+  geom_hline(yintercept = labdf$cEquivAAC,
+             linewidth = 1, linetype = "dotted")
          #y = expression(paste("tonnes C"," ha"^"-1", "r?colt?","\n")))
 
 
@@ -372,7 +429,7 @@ p <- ggplot(dfTotal, aes(x = initYear+Time, y = areaHarvestedTotal_ha,
   scale_color_manual(name = "Disturbance\nscenario",
                      values = cols[[a]],
                      labels = treatLevels[[a]]) +
-  scale_y_continuous(labels = label_number(suffix = "kt C", scale = 1e-3)) +
+  scale_y_continuous(labels = label_number(suffix = "", scale = 1e-3)) +
   theme_dark() +
   theme(plot.caption = element_text(size = rel(.5), hjust = 0),
         axis.text.x = element_text(angle = 45, hjust = 1)) +
@@ -380,7 +437,7 @@ p <- ggplot(dfTotal, aes(x = initYear+Time, y = areaHarvestedTotal_ha,
   labs(title = "Total area harvested",
        subtitle = paste(areaName, simName),
        x = "",
-       y = expression(paste("Area (ha)",))) 
+       y = expression(paste("Area (kha)",))) 
 
 
 png(filename= paste0("harvest_areaHarvested_", simName, ".png"),

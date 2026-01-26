@@ -23,7 +23,7 @@ require(dplyr)
 inputDir <- inputPathLandis
 
 
-simDuration <- 75 #overridden if spinup == T
+simDuration <- 50 #overridden if spinup == T
 t0 <- 2020 ### should be the same as t0 from initForCS.R
 
 
@@ -36,16 +36,16 @@ expDesign <- list(area = c("mixedwood-042-51"),#temperate-2a-3b", "boreal-5a", "
                   scenario = c("baseline"),#c("baseline", "RCP45", "RCP85")
                   mgmt = list(#Hereford = "1"),#c("1", "2", "3", "4", "noHarvest")),
                     # "mixedwood-042-51" =  c("generic", "noHarvest")),
-                    "mixedwood-042-51" =  c("generic","noHarvest")), #noHarvest
+                    "mixedwood-042-51" =  c("baseline", "baseline_50p", "baseline_75p")),# "generic","noHarvest")), #noHarvest
                   spinup = F,
                   cropped  = list("mixedwood-042-51" = F),
-                  rep = 5,
+                  rep = 3,
                   #ND natural disturbances 
                   ND = data.frame(
                     wind = c(TRUE, TRUE, TRUE),
                     BDA = c(FALSE, TRUE, TRUE),
                     fire = c(FALSE, FALSE, TRUE),
-                    ND_scenario=c("Wind","Wind_Sbw","Wind_Sbw_Fire")
+                    ND_scenario=c("Wind", "Wind_Sbw","Wind_Sbw_Fire")
                   )
 )
 
@@ -91,7 +91,7 @@ for (a in names(expDesign$mgmt)) {
 simInfo <- do.call("rbind", simInfo) %>%
   mutate(harvest = ifelse(mgmt == "noHarvest", F, T)) %>%
   arrange(replicate, fire, BDA, wind, harvest) %>%
-  select(areaName, scenario, mgmt, cropped, spinup, includeSnags,
+  dplyr::select(areaName, scenario, mgmt, cropped, spinup, includeSnags,
          harvest, wind, BDA, fire, ND_scenario, replicate)
 
 
