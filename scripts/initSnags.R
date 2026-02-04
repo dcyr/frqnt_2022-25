@@ -80,8 +80,8 @@ for (a in areas) {
   initCommVals <- unique(values(raster(paste0("../inputsLandis/initial-communities_", a, ".tif"))))
   
   
-  
-  ###
+  #########################
+  ### creating a spp lookup table with all the useful id keys
   sppLookupTbl <- species %>%
     left_join(vegCodes,  by = c("V1" = "LandisCode")) %>%
     left_join(qcCodes, by = c("Code" = "code")) %>%

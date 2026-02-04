@@ -15,9 +15,11 @@ setwd(wwd)
 
 require(dplyr)
 
+
+ecoInd_corr <- T ### with ForCS v 3.1 and before, there's a bug in how NEP is calculated. 
 initYear <- 2020
 unitConvFact <- 0.01 ### from gC /m2 to tonnes per ha
-simName <- "mixedwood-042-51 - 2025-04-13"
+simName <- "mixedwood-042-51 - 2026-01-27"
 a <- ifelse(grepl("mixedwood-042-51", simName), "mixedwood-042-51",
             ifelse(grepl("boreal-085-51", simName), "boreal-085-51",
                    ifelse(grepl("temperate-2a-3b", simName), "temperate-2a-3b")))
@@ -40,7 +42,6 @@ require(scales)
 
 ##########################################################
 ##### pools
-variableLvl <- c("TotalEcosys", "TotalDOM", "ABio", "BBio") ## ordering levels for plotting
 
 
 treatLevels <- list("boreal-085-51" = c("generic" = "Generic",
@@ -58,12 +59,20 @@ treatLevels <- list("boreal-085-51" = c("generic" = "Generic",
                                          "Wind_Sbw" = "Wind and Spruce Budworm",
                                          "Wind_Sbw_Fire" = "Wind, Spruce Budworm and wildfires"))
 
-mgmtLevels <- list("boreal-085-51" = c("generic" = "Generic",
+mgmtLevels <- list("boreal-085-51" = c("baseline_50p" = "Baseline 50%",
+                                       "baseline_75p" = "Baseline 75%",
+                                       "baseline" = "Baseline 100%",
+                                       
                                        #"CPI-CP" = "Couvert permanent",
                                        "noHarvest" = "Conservation"),
-                   "mixedwood-042-51" = c("generic" = "Generic",
+                   "mixedwood-042-51" = c("baseline_45p" = "Baseline",
+                                          #"baseline_75p" = "Baseline 75%",
+                                          #"baseline" = "Baseline 100%",
                                           #"CPI-CP" = "Couvert permanent",
                                           "noHarvest" = "Conservation"),
+                                          #c("generic" = "Generic",
+                                          #"CPI-CP" = "Couvert permanent",
+                                          #"noHarvest" = "Conservation"),
                    #c("generic" = "Generic",
                    #"CPI-CP" = "Couvert permanent",
                    #"noHarvest" = "Conservation"),
@@ -130,8 +139,41 @@ outputSummary <- get(load(paste0("../outputCompiled/output_summary_", simName, "
 fps <- read.csv(paste0("../outputCompiled/output_BioToFPS_", simName, ".csv"))#read.csv("output_BioToFPS_Hereford.csv")#
 AGB <- get(load(paste0("../outputCompiled/output_bio_", simName, ".RData")))
 
+
+
+
+###### before ForCS 4.0, there was a bug in how ecosystem indicators were calculated,
+####
+if(ecoInd_corr) {
+  variableLvl <- levels(outputSummary$variable)
+  df <- pivot_wider(outputSummary, names_from = variable, values_from = value) %>%
+    mutate(totalC = ABio + BBio + TotalDOM) %>%
+    group_by(simID) %>% 
+    arrange(Time) %>%
+    mutate(NBPcorr = totalC - lag(totalC)) %>%
+    ungroup() %>%
+    mutate(distOutflux = NEP - NBP,
+           NBP = NBPcorr,
+           NEP = NBP + distOutflux,
+           NPP = NEP + Rh,
+           NetGrowth = NPP - Turnover) %>%
+    dplyr::select(simID, Time,
+                  ABio, BBio, TotalDOM, DelBio, Turnover, 
+                  NetGrowth, NPP, Rh, NEP, NBP) %>%
+    pivot_longer(cols = c("ABio", "BBio", "TotalDOM", "DelBio", "Turnover",
+                          "NetGrowth", "NPP", "Rh", "NEP", "NBP"),
+                 names_to = "variable",
+                 values_to = "valueCorr")
+  ##
+  outputSummary <- left_join(outputSummary, df) %>%
+    mutate(value = valueCorr,
+           variable = factor(variable, levels = variableLvl)) %>%
+    dplyr::select(-valueCorr)
+}
+  
 ################################################################################
 ### renaming stuff
+
 outputSummary <- outputSummary %>%
     filter(variable != "mgmtScenarioName") %>%
     mutate(value = as.numeric(value)) %>%
@@ -162,6 +204,9 @@ require(tidyr)
 
 
 ### pools
+
+variableLvl <- c("TotalEcosys", "TotalDOM", "ABio", "BBio") ## ordering levels for plotting
+
 df <- outputSummary %>%
     filter(Time >=1,variable %in% variableLvl) %>%
     group_by(areaName, scenario, 
@@ -219,14 +264,15 @@ df <- df %>%
 
   
 p <- ggplot(df, aes(x = initYear+Time, y = value*unitConvFact,
-               colour = ND_scenario, linetype = mgmtScenarioName  )) +
+                    linetype = mgmtScenarioName ,
+               colour = ND_scenario)) +
     facet_grid(variable ~ scenario, scale = "free") +
     theme_bw() +
   scale_color_manual(name = "Natural disturbance\nscenario",
                      values = cols[[a]],
                      labels = treatLevels[[a]]) +
   scale_linetype_manual(name = "Management\nscenario",
-                        values = c("Generic" = "solid",
+                        values = c("Baseline" = "solid",
                                    "Conservation" = "dotted")) +
 
     geom_line(#linetype = mgmtName,
@@ -241,7 +287,7 @@ p <- ggplot(df, aes(x = initYear+Time, y = value*unitConvFact,
                           "Taper equations from: Honer et al. 1983. Metric timber tables for the commercial tree species of Central and Eastern Canada."))
 
 
-    
+
 png(filename= paste0("pools_", simName, ".png"),
     width = 9, height = 6, units = "in", res = 600, pointsize=10)
     
@@ -253,7 +299,7 @@ dev.off()
 
 ### fluxes
 
-
+# 
 variableLvl <- c("DelBio",  "Turnover",
                  "NetGrowth",  "NPP",
                  "Rh",  "NEP",
@@ -285,10 +331,12 @@ df <- outputSummary %>%
            Time, variable) %>%
     summarise(value = mean(value))
 
-
 p <- ggplot(df, aes(x = initYear+Time, y = value*unitConvFact, #group = simID,
-                    colour = ND_scenario, linetype = mgmtScenarioName)) +
-    facet_grid(variable ~ scenario, scale = "free") +#facet_wrap( ~ scenario) +
+                    linetype = mgmtScenarioName,
+                    colour = ND_scenario)) +
+  
+    #facet_grid(variable ~ scenario, scale = "free") +#facet_wrap( ~ scenario) +
+    facet_grid(variable ~ scenario , scale = "free") +#facet_wrap( ~ scenario) +
     theme_bw() +
     geom_hline(yintercept = 0, linetype = 1, color = "grey25", size = 0.35) +
     geom_line() +
@@ -298,7 +346,7 @@ p <- ggplot(df, aes(x = initYear+Time, y = value*unitConvFact, #group = simID,
                        values = cols[[a]],
                        labels = treatLevels[[a]]) +
     scale_linetype_manual(name = "Management\nscenario",
-                          values = c("Generic" = "solid",
+                          values = c("Baseline" = "solid",
                                      "Conservation" = "dotted")) +
     theme(plot.caption = element_text(size = rel(.5), hjust = 0)) +
     labs(title = paste("Carbon dynamics"),
@@ -314,6 +362,105 @@ png(filename= paste0("fluxes_", simName, ".png"),
 print(p +  theme(legend.text=element_text(size=rel(.75))))
 dev.off()
 
+
+### fluxes, rel to 'Wind' only
+dfRef <- df %>%
+  filter(ND_scenario == "Wind" &
+           mgmtScenario == "noHarvest")
+
+
+dfRel  <- df %>%
+  #filter(ND_scenario != "Wind") %>%
+  left_join(dfRef,
+            by = c("areaName", "scenario",
+                   #"mgmtScenario", "mgmtScenarioName",
+                   "Time", "variable")) %>%
+  mutate(value.rel = value.x - value.y,
+         ND_scenario = ND_scenario.x,
+         ND_scenarioName = ND_scenarioName.x,
+         mgmtScenario = mgmtScenario.x,
+         mgmtScenarioName = mgmtScenarioName.x) %>%
+  #rbind(dfRef) %>%
+  dplyr::select(areaName, scenario, ND_scenario, ND_scenarioName,
+         mgmtScenario, mgmtScenarioName,
+         Time, variable, value.x, value.rel)
+  
+
+p <- ggplot(dfRel, aes(x = initYear+Time, y = value.rel*unitConvFact, #group = simID,
+                    linetype = mgmtScenarioName,
+                    colour = ND_scenario)) +
+  
+  #facet_grid(variable ~ scenario, scale = "free") +#facet_wrap( ~ scenario) +
+  facet_grid(variable ~ scenario , scale = "free") +#facet_wrap( ~ scenario) +
+  theme_bw() +
+  geom_hline(yintercept = 0, linetype = 1, color = "grey25", size = 0.35) +
+  geom_line() +
+  theme(plot.caption = element_text(size = rel(.5), hjust = 0),
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_manual(name = "Natural disturbance\nscenario",
+                     values = cols[[a]],
+                     labels = treatLevels[[a]]) +
+  scale_linetype_manual(name = "Management\nscenario",
+                        values = c("Baseline" = "solid",
+                                   "Conservation" = "dotted")) +
+  theme(plot.caption = element_text(size = rel(.5), hjust = 0)) +
+  labs(title = paste('Carbon dynamics\nRelative to "Wind-only ND scenario"'),
+       subtitle = paste(areaName, simName),
+       x = "",
+       y = expression(paste("tonnes C"," ha"^"-1", " yr"^"-1", "\n")),
+       caption = paste(caption, collapse = "\n")) 
+
+
+png(filename= paste0("fluxesRel_", simName, ".png"),
+    width = 7, height = 8, units = "in", res = 600, pointsize=10)
+
+print(p +  theme(legend.text=element_text(size=rel(.75))))
+dev.off()
+
+
+
+###
+### cumulative, relative to "wind_only
+
+
+dfRelCumul  <- dfRel %>%
+  group_by(areaName, scenario, ND_scenario, ND_scenarioName,
+           mgmtScenario, mgmtScenarioName, 
+           variable) %>%
+  arrange(Time) %>%
+  mutate(value.rel.cumul = cumsum(replace_na(value.rel, 0)))
+
+
+p <- ggplot(dfRelCumul, aes(x = initYear+Time, y = value.rel.cumul*unitConvFact, #group = simID,
+                       linetype = mgmtScenarioName,
+                       colour = ND_scenario)) +
+  
+  #facet_grid(variable ~ scenario, scale = "free") +#facet_wrap( ~ scenario) +
+  facet_grid(variable ~ scenario , scale = "free") +#facet_wrap( ~ scenario) +
+  theme_bw() +
+  geom_hline(yintercept = 0, linetype = 1, color = "grey25", size = 0.35) +
+  geom_line() +
+  theme(plot.caption = element_text(size = rel(.5), hjust = 0),
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_manual(name = "Natural disturbance\nscenario",
+                     values = cols[[a]],
+                     labels = treatLevels[[a]]) +
+  scale_linetype_manual(name = "Management\nscenario",
+                        values = c("Baseline" = "solid",
+                                   "Conservation" = "dotted")) +
+  theme(plot.caption = element_text(size = rel(.5), hjust = 0)) +
+  labs(title = paste('Carbon dynamics\nCumulative differences - Relative to "Wind-only / No harvest " scenario'),
+       subtitle = paste(areaName, simName),
+       x = "",
+       y = expression(paste("tonnes C"," ha"^"-1", " yr"^"-1", "\n")),
+       caption = paste(caption, collapse = "\n")) 
+
+
+png(filename= paste0("fluxesRelCumul_", simName, ".png"),
+    width = 7, height = 8, units = "in", res = 600, pointsize=10)
+
+print(p +  theme(legend.text=element_text(size=rel(.75))))
+dev.off()
 ################################################################################
 ################################################################################
 ### to FPS
@@ -364,14 +511,14 @@ colourCount = length(unique(df$spGr))
 getPalette = colorRampPalette(brewer.pal(8, "Set1"))
 
 ### stacked (per species)
-pWidth <- 4*length(unique(df$ND_scenarioName))+2
+pWidth <- 3*length(unique(df$ND_scenarioName))+2
 png(filename= paste0("fps_spp_", simName, ".png"),
-    width = pWidth, height = 6, units = "in", res = 600, pointsize=10)
+    width = pWidth, height = 8, units = "in", res = 600, pointsize=10)
 
 #ggplot(df, aes(x = 2010+Time, y = BioToFPS_tonnesCTotal/areaHarvestedTotal_ha)) + 
 ggplot(df, aes(x = initYear+Time, y = BioToFPS_tonnesCTotal)) + 
     stat_summary(aes(fill = spGr), fun.y="sum", geom="area", position = "stack") +
-    facet_grid(scenario ~ ND_scenarioName  ) +
+    facet_grid(ND_scenarioName ~ mgmtScenarioName) +
     scale_fill_manual(values = spGrCol, name = NULL) +
     #scale_fill_manual(values = getPalette(colourCount)) +
     scale_y_continuous(labels = label_number(suffix = "kt C", scale = 1e-3)) +
@@ -396,11 +543,12 @@ dev.off()
 p <- ggplot(dfTotal, aes(x = initYear+Time, y = BioToFPS_tonnesCTotal,
                          colour = ND_scenario)) +
     geom_line() +
-    facet_wrap( ~ scenario) +
+    facet_wrap(~scenario ) +#mgmtScenarioName) +
     scale_color_manual(name = "Disturbance\nscenario",
                        values = cols[[a]],
                        labels = treatLevels[[a]]) +
-    scale_y_continuous(labels = label_number(suffix = "kt C", scale = 1e-3)) +
+    scale_y_continuous(labels = label_number(suffix = "kt C", scale = 1e-3),
+                       limits = c(0, 1.25*max(dfTotal$BioToFPS_tonnesCTotal))) +
     theme_dark() +
     theme(plot.caption = element_text(size = rel(.5), hjust = 0),
           axis.text.x = element_text(angle = 45, hjust = 1)) +
@@ -425,11 +573,12 @@ dev.off()
 p <- ggplot(dfTotal, aes(x = initYear+Time, y = areaHarvestedTotal_ha,
                     colour = ND_scenario)) +
   geom_line() +
-  facet_wrap( ~ scenario) +
+  facet_wrap(scenario ~ mgmtScenarioName) +
   scale_color_manual(name = "Disturbance\nscenario",
                      values = cols[[a]],
                      labels = treatLevels[[a]]) +
-  scale_y_continuous(labels = label_number(suffix = "", scale = 1e-3)) +
+  scale_y_continuous(labels = label_number(suffix = "", scale = 1e-3),
+                     limits = c(0, 1.25*max(dfTotal$areaHarvestedTotal_ha))) +
   theme_dark() +
   theme(plot.caption = element_text(size = rel(.5), hjust = 0),
         axis.text.x = element_text(angle = 45, hjust = 1)) +

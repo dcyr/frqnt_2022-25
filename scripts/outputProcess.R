@@ -24,7 +24,7 @@ require(foreach)
 
 ### fetching outputs
 a <- "mixedwood-042-51" #
-simDir <- paste0("D:/forCS - mixedwood-042-51 - 2026-01-21/")#"
+simDir <- paste0("D:/forCS - mixedwood-042-51 - 2026-01-27/")#"
 studyArea <- raster(paste0("../inputsLandis/studyArea_", a, ".tif"))
 
 
@@ -44,17 +44,6 @@ logs <- c("summary",
           "FPS"
           ) #"FPS" ,"summary", "agbAgeClasses", "agbAgeClasses", "agbTotal","ageMax",
 
-# ### hereford
-# mgmtLevels <- c("1" = "Intensif",
-#                 "3" = "Servitude",
-#                 "4" = "Nouveau zonage",
-#                 "2" = "Conservation")
-
-# ### ForMont
-# mgmtLevels <- c("1" = NA,
-#                 "3" = NA,
-#                 "4" = NA,
-#                 "2" = NA)
 
 if("summary" %in% logs) {
     source("../scripts/fetchHarvestImplementationFnc.R")
