@@ -42,10 +42,10 @@ expDesign <- list(area = c("mixedwood-042-51"),#temperate-2a-3b", "boreal-5a", "
                   rep = 5,
                   #ND natural disturbances 
                   ND = data.frame(
-                    wind = c(TRUE, TRUE, TRUE),
-                    BDA = c(FALSE, TRUE, TRUE),
-                    fire = c(FALSE, FALSE, TRUE),
-                    ND_scenario=c("Wind", "Wind_Sbw","Wind_Sbw_Fire")
+                    wind = c(TRUE, TRUE, TRUE, TRUE),
+                    BDA = c(FALSE, TRUE, TRUE, FALSE),
+                    fire = c(FALSE, FALSE, TRUE, TRUE),
+                    ND_scenario=c("Wind", "Wind_Sbw","Wind_Sbw_Fire", "Wind_Fire")
                   )
 )
 
@@ -101,6 +101,10 @@ simInfo <- data.frame(simID = str_pad(sID, nchar(max(sID)),
                       simInfo)
 simInfo[,"harvest"] <- simInfo[,"mgmt"]!= "noHarvest"
 row.names(simInfo) <- 1:nrow(simInfo)
+
+# simInfo <- filter(simInfo, ND_scenario == "Wind_Fire")
+# row.names(simInfo) <- 30:(29+nrow(simInfo))
+# simInfo$simID <- as.character(row.names(simInfo))
 
 require(parallel)
 require(doSNOW)

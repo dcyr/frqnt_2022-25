@@ -50,6 +50,7 @@ treatLevels <- list("boreal-085-51" = c("generic" = "Generic",
                    "mixedwood-042-51" = c("No_ND" = "No natural disturbances",
                                           "Wind" = "Wind",
                                           "Wind_Sbw" = "Wind and Spruce Budworm",
+                                          "Wind_Fire" = "Wind and wildfires",
                                           "Wind_Sbw_Fire" = "Wind, Spruce Budworm and wildfires"),
                      #c("generic" = "Generic",
                                    #"CPI-CP" = "Couvert permanent",
@@ -57,6 +58,7 @@ treatLevels <- list("boreal-085-51" = c("generic" = "Generic",
                    "temperate-2a-3b" = c("No_ND" = "No natural disturbances",
                                          "Wind" = "Wind",
                                          "Wind_Sbw" = "Wind and Spruce Budworm",
+                                         "Wind_Fire" = "Wind and wildfires",
                                          "Wind_Sbw_Fire" = "Wind, Spruce Budworm and wildfires"))
 
 mgmtLevels <- list("boreal-085-51" = c("baseline_50p" = "Baseline 50%",
@@ -91,11 +93,13 @@ cols <- list("boreal-085-51" = c("Generic" = "black",
              "mixedwood-042-51" = c("No_ND" = "black",
                                     "Wind" = "lightgreen",#"Couvert permanent" = "dodgerblue3",
                                     "Wind_Sbw" = "goldenrod3",
-                                    "Wind_Sbw_Fire" = "indianred"),
+                                    "Wind_Fire" = "indianred",
+                                    "Wind_Sbw_Fire" = "darkred"),
              "temperate-2a-3b" = c("No_ND" = "black",
                                    "Wind" = "lightgreen",#"Couvert permanent" = "dodgerblue3",
                                    "Wind_Sbw" = "goldenrod3",
-                                   "Wind_Sbw_Fire" = "indianred"))
+                                   "Wind_Fire" = "indianred",
+                                   "Wind_Sbw_Fire" = "darkred"))
 
 spp <- read.table(paste0("../inputsLandis/species_", a, ".txt"),
                       skip = 1, comment.char = ">")
@@ -286,10 +290,12 @@ p <- ggplot(df, aes(x = initYear+Time, y = value*unitConvFact,
          caption = paste0("Allometric equations from: Ung et al. 2008. Canadian national biomass equations: new parameter estimates that include British Columbia data. Can. J. For. Res 38:1123-2232.\n",
                           "Taper equations from: Honer et al. 1983. Metric timber tables for the commercial tree species of Central and Eastern Canada."))
 
-
+ 
+pHeight <- 1 + 1.5*length(unique(df$variable))
+pWidth <- 4 + 3*length(unique(df$scenario))
 
 png(filename= paste0("pools_", simName, ".png"),
-    width = 9, height = 6, units = "in", res = 600, pointsize=10)
+    width = pWidth, height = 6, units = "in", res = 600, pointsize=10)
     
     print(p)
 
@@ -356,6 +362,7 @@ p <- ggplot(df, aes(x = initYear+Time, y = value*unitConvFact, #group = simID,
          caption = paste(caption, collapse = "\n")) 
 
 
+
 png(filename= paste0("fluxes_", simName, ".png"),
     width = 7, height = 8, units = "in", res = 600, pointsize=10)
 
@@ -365,8 +372,8 @@ dev.off()
 
 ### fluxes, rel to 'Wind' only
 dfRef <- df %>%
-  filter(ND_scenario == "Wind" &
-           mgmtScenario == "noHarvest")
+  filter(ND_scenario == "Wind_Sbw_Fire" &
+           mgmtScenario == "baseline_45p")
 
 
 dfRel  <- df %>%
@@ -511,9 +518,10 @@ colourCount = length(unique(df$spGr))
 getPalette = colorRampPalette(brewer.pal(8, "Set1"))
 
 ### stacked (per species)
-pWidth <- 3*length(unique(df$ND_scenarioName))+2
+pWidth <- 4*length(unique(df$scenario))+4
+pHeight <- 1+2.25*length(unique(df$ND_scenarioName))
 png(filename= paste0("fps_spp_", simName, ".png"),
-    width = pWidth, height = 8, units = "in", res = 600, pointsize=10)
+    width = pWidth, height = pHeight, units = "in", res = 600, pointsize=10)
 
 #ggplot(df, aes(x = 2010+Time, y = BioToFPS_tonnesCTotal/areaHarvestedTotal_ha)) + 
 ggplot(df, aes(x = initYear+Time, y = BioToFPS_tonnesCTotal)) + 
@@ -531,7 +539,7 @@ ggplot(df, aes(x = initYear+Time, y = BioToFPS_tonnesCTotal)) +
          y = expression(paste("Transfers to HWP",))) +
     geom_text(data = labdf, aes(label = paste("Managed area:", areaManagedTotal_ha, "ha"),
                                 y = yMax, x = initYear),
-              hjust = 0, vjust = 1, size = 2) +
+              hjust = 0, vjust = 1, size = 3) +
   geom_hline(yintercept = labdf$cEquivAAC,
               linewidth = 1, linetype = "dotted")
     
@@ -561,9 +569,11 @@ p <- ggplot(dfTotal, aes(x = initYear+Time, y = BioToFPS_tonnesCTotal,
              linewidth = 1, linetype = "dotted")
          #y = expression(paste("tonnes C"," ha"^"-1", "r?colt?","\n")))
 
+pWidth <- 4*length(unique(df$scenario))+4
+pHeight <- pWidth*.5
 
 png(filename= paste0("fps_total_", simName, ".png"),
-    width = 8, height = 4, units = "in", res = 600, pointsize=10)
+    width = pWidth, height = pHeight, units = "in", res = 600, pointsize=10)
 print(p)
 
 dev.off()
@@ -577,7 +587,7 @@ p <- ggplot(dfTotal, aes(x = initYear+Time, y = areaHarvestedTotal_ha,
   scale_color_manual(name = "Disturbance\nscenario",
                      values = cols[[a]],
                      labels = treatLevels[[a]]) +
-  scale_y_continuous(labels = label_number(suffix = "", scale = 1e-3),
+  scale_y_continuous(labels = label_number(suffix = "", scale = 1e0),#1e-3),s
                      limits = c(0, 1.25*max(dfTotal$areaHarvestedTotal_ha))) +
   theme_dark() +
   theme(plot.caption = element_text(size = rel(.5), hjust = 0),
@@ -586,9 +596,10 @@ p <- ggplot(dfTotal, aes(x = initYear+Time, y = areaHarvestedTotal_ha,
   labs(title = "Total area harvested",
        subtitle = paste(areaName, simName),
        x = "",
-       y = expression(paste("Area (kha)",))) 
+       y = expression(paste("Area (ha)",))) 
 
-
+pWidth <- 4*length(unique(df$scenario))+4
+pHeight <- pWidth*.5
 png(filename= paste0("harvest_areaHarvested_", simName, ".png"),
     width = 8, height = 4, units = "in", res = 600, pointsize=10)
 print(p)
@@ -647,9 +658,10 @@ require(RColorBrewer)
 ### stacked (total)
 colourCount = length(unique(df$species))
 getPalette = colorRampPalette(brewer.pal(9, "Set1"))
-pHeight <- 2 * length(unique(df$ND_scenario))
+pHeight <- .5 + 3*length(unique(df$mgmtScenario))
+pWidth <- .5 + 3*length(unique(df$ND_scenario))
 png(filename= paste0("agb_sppStack_", simName, ".png"),
-    width = 8, height = pHeight, units = "in", res = 600, pointsize=10)
+    width = pWidth, height = pHeight, units = "in", res = 600, pointsize=10)
 
 ggplot(df, aes(x = 2020 + Time, y = agb_tonnesTotal/areaTotal_ha)) + 
     stat_summary(aes(fill = species), fun.y="sum", geom="area", position = "stack") +
@@ -657,7 +669,7 @@ ggplot(df, aes(x = 2020 + Time, y = agb_tonnesTotal/areaTotal_ha)) +
     scale_fill_manual("",
                       values = getPalette(colourCount)) +
     theme_bw() +
-    theme(plot.caption = element_text(size = rel(.5), hjust = 0),
+    theme(plot.caption = element_text(size = rel(.75), hjust = 0),
           axis.text.x = element_text(angle = 45, hjust = 1)) +
     labs(title = "Evolution of landscape composition  - Aboveground biomass*",
          subtitle = paste(areaName, simName),
@@ -674,7 +686,7 @@ colourCount = length(unique(df$species))
 getPalette = colorRampPalette(brewer.pal(9, "Set1"))
 
 png(filename= paste0("agb_sppLine_", simName, ".png"),
-    width = 8, height = pHeight, units = "in", res = 600, pointsize=10)
+    width = pWidth, height = pHeight, units = "in", res = 600, pointsize=10)
 
 ggplot(df, aes(x = 2020+Time, y = agb_tonnesTotal/areaTotal_ha,
                colour = species,
@@ -686,7 +698,7 @@ ggplot(df, aes(x = 2020+Time, y = agb_tonnesTotal/areaTotal_ha,
                         values = getPalette(colourCount)) +
     #scale_fill_manual(values = getPalette(colourCount)) +
     theme_bw() +
-    theme(plot.caption = element_text(size = rel(.5), hjust = 0),
+    theme(plot.caption = element_text(size = rel(.75), hjust = 0),
           axis.text.x = element_text(angle = 45, hjust = 1)) +
     labs(title = "Evolution of landscape composition  - Aboveground biomass*",
          subtitle = paste(areaName, simName),
@@ -745,7 +757,9 @@ df[,"ageClass"] <- factor(df$ageClass, levels = acLvls)
 
 
 #### mgmt ~ scenario
-    
+pHeight <- .5 + 3*length(unique(df$mgmtScenario))
+pWidth <- .5 + 3*length(unique(df$ND_scenario))
+
 p <- ggplot(df, aes(x = 2020+Time, y = agb_tonnesTotal/areaTotal_ha)) + 
     stat_summary(aes(fill = ageClass), fun.y="sum", geom="area", position = "stack") +
   facet_grid(mgmtScenarioName ~ ND_scenarioName, scales = "fixed") +#scales = "free_y") +
@@ -761,7 +775,7 @@ p <- ggplot(df, aes(x = 2020+Time, y = agb_tonnesTotal/areaTotal_ha)) +
          caption = "*Values are expressed as total dry mass (biomass), not carbon mass.")
 
 png(filename= paste0("agb_AgeClassStacked_",simName, ".png"),
-    width = 10, height = 6, units = "in", res = 600, pointsize=10)
+    width = pWidth, height = pHeight, units = "in", res = 600, pointsize=10)
     print(p)
 dev.off()
 
